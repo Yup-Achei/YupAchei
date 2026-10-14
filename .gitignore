@@ -1,0 +1,21 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+*.rsuser
+TestResults/
+appsettings.*.json
+!appsettings.json
+# Node.js
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+# OS
+.DS_Store
+Thumbs.db
