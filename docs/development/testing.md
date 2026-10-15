@@ -48,12 +48,13 @@ dotnet test
 - Validação estrita do compilador TypeScript (`tsc -b`).
 - Análise de qualidade de código e conformidade com linter (`oxlint` / `eslint`).
 
-### 3.2 Testes Unitários e de Componentes *(Futuro)*
-- Testes de renderização de componentes com React Testing Library e Vitest à medida que componentes e interações de interface forem implementados.
+### 3.2 Testes Unitários e de Componentes
+- Testes de renderização de componentes com React Testing Library e Vitest à medida que componentes e interações de interface forem implementados. A suíte inicial já usa Vitest, Testing Library e jsdom. Os arquivos ficam em `frontend/src/**/*.test.ts` e `frontend/src/**/*.test.tsx`. A preparação comum está em `frontend/src/test/setup.ts`, carregada por `frontend/vitest.config.ts`.
 
 **Execução:**
 ```bash
 cd frontend
+npm test
 npm run build
 npm run lint
 ```

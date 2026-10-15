@@ -21,6 +21,8 @@ Este documento consolida o estado técnico e as premissas confirmadas do projeto
 - **Frontend:**
   - Framework: React 19 + TypeScript.
   - Ferramenta de Build: Vite.
+  - Estilo: Tailwind CSS 4, com tokens de marca em `frontend/src/index.css`.
+  - Testes: Vitest + Testing Library.
   - Tipagem: TypeScript em modo estrito (`strict: true`).
 - **Orquestração Local:**
   - Docker Compose para empacotamento e orquestração dos serviços de desenvolvimento (`backend` e `frontend`).

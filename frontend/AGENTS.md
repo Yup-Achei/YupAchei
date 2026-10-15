@@ -9,11 +9,15 @@ Este documento complementa o [AGENTS.md](../AGENTS.md) da raiz com diretrizes es
 A estrutura modular em `frontend/src/` organiza a aplicação de forma desacoplada:
 
 - `src/app/`: Configurações globais da aplicação (provedores de contexto, roteador, estado global).
+- `src/pages/`: Uma tela por rota. Compõe as features quando a tela reúne mais de um assunto.
 - `src/features/`: Módulos de domínio funcional da aplicação. Cada feature pode conter seus próprios componentes, hooks e tipos específicos.
 - `src/components/`: Componentes reutilizáveis compartilhados e genéricos (botões, modais, layouts, inputs).
+- `src/mocks/`: JSON de exemplo de categorias, locais e eventos, enquanto a tela ainda não chama a API.
 - `src/services/`: Clientes e funções de comunicação HTTP com o backend YupAchei.API, centralizando URLs e tratamento base de requisições.
 - `src/hooks/`: Hooks customizados utilitários compartilhados.
 - `src/types/`: Definições globais de tipos e contratos de dados sincronizados com a API backend.
+
+O estilo usa Tailwind CSS 4, com tokens de marca em `src/index.css`. O alias `@/` aponta para `src/`.
 
 ---
 
@@ -37,6 +41,9 @@ npm run build
 
 # Validação com linter
 npm run lint
+
+# Testes unitários (Vitest e Testing Library)
+npm test
 ```
 
 Consulte [docs/architecture/frontend.md](../docs/architecture/frontend.md) para detalhes arquiteturais completos.
