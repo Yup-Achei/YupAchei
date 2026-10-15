@@ -1,79 +1,114 @@
-# YupAchei 📍
+# YupAchei
 
-**YupAchei** é um guia e recomendador de experiências locais — restaurantes, eventos, passeios e lugares — entregue como **PWA (Progressive Web App)**. A cidade de lançamento do MVP é **Porto Velho - RO**.
+Estrutura inicial de desenvolvimento do projeto **YupAchei**, composta por backend independente em **.NET 10** (Clean Architecture) e frontend em **React + TypeScript** (Vite).
 
-- Acesso 100% livre no MVP (sem login)
-- Conteúdo fornecido por parceiros e influenciadores digitais
-- Recomendações inteligentes via LLM/Agente (opcional no MVP)
+---
 
-## 🏗️ Arquitetura (Clean Architecture / DDD)
+## 📁 Estrutura do Repositório
 
+```text
+YupAchei/
+├── AGENTS.md                  # Instruções operacionais para agentes e devs
+├── CONTEXT.md                 # Contexto técnico e premissas confirmadas
+├── README.md                  # Apresentação do projeto e guia de uso
+├── .gitignore                 # Regras de exclusão do Git
+├── .agents/
+│   ├── rules/                 # Regras arquiteturais e limites operacionais
+│   └── skills/                # Skills de desenvolvimento de agentes
+├── docs/                      # Documentação técnica e arquitetural
+│   ├── architecture/          # Visão geral, backend, frontend e ADRs
+│   ├── development/           # Fluxo de trabalho e estratégia de testes
+│   ├── agents/                # Configuração e catálogo de skills
+│   └── specs/                 # Especificações funcionais futuras
+├── backend/                   # Backend .NET 10 (Clean Architecture)
+│   ├── AGENTS.md
+│   ├── Dockerfile
+│   ├── YupAchei.sln
+│   ├── src/                   # Camadas Domain, Application, Infrastructure, API
+│   └── tests/                 # Projetos xUnit unitários e de integração
+├── frontend/                  # Frontend React + TypeScript (Vite)
+│   ├── AGENTS.md
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   └── src/                   # Módulos app, features, components, services, etc.
+└── docker-compose.yml         # Orquestração local dos serviços
 ```
- ┌──────────────────────────┐
- │  YupAchei.Client (PWA)   │  React + TypeScript + Vite
- └────────────┬─────────────┘
-              │ HTTP / JSON
- ┌────────────▼─────────────┐
- │     YupAchei.WebApi      │  Minimal APIs, Middlewares, DI, Swagger
- └──┬──────────┬─────────┬──┘
-    │          │         │
-    │   ┌──────▼──────┐  │   ┌─────────────────────────┐
-    │   │ YupAchei.   │  └──►│ YupAchei.Infrastructure │ EF Core, DbContext,
-    │   │ Services    │      │                         │ Migrations, Repos
-    │   │ (LLM / SK)  │      └───────┬─────────┬───────┘
-    │   └──────┬──────┘              │         │
-    │          │                     │         │
- ┌──▼──────────▼─────────────────────▼──┐      │
- │        YupAchei.Application          │      │  Casos de uso, DTOs,
- └──────────────────┬───────────────────┘      │  Mappings, Interfaces
-                    │                          │
- ┌──────────────────▼──────────────────────────▼┐
- │              YupAchei.Domain                 │  Entidades, Enums,
- │        (sem dependências externas)           │  Interfaces de Repositório
- └──────────────────────────────────────────────┘
-```
 
-| Projeto | Responsabilidade | Depende de |
-|---|---|---|
-| `YupAchei.Domain` | Entidades, Enums, Interfaces de Repositório | — |
-| `YupAchei.Application` | Casos de uso, DTOs, Mappings, Interfaces de serviços | Domain |
-| `YupAchei.Infrastructure` | EF Core, DbContext, Migrations, Repositórios, Serviços externos | Domain, Application |
-| `YupAchei.Services` | Integração LLM/Agente, Semantic Kernel (opcional no MVP) | Application |
-| `YupAchei.WebApi` | Minimal APIs/Controllers, Middlewares, DI, Swagger | Application, Infrastructure, Services |
-| `YupAchei.Client` | Frontend React + TypeScript PWA (Vite) | WebApi (HTTP) |
+---
 
-## 🧰 Stack
+## 🛠️ Pré-requisitos
 
-- **Frontend:** React, TypeScript, Vite, PWA
-- **Backend:** C#, .NET 8, ASP.NET Core (Minimal APIs), Swagger/OpenAPI
-- **Dados:** Entity Framework Core, PostgreSQL 16
-- **IA (opcional):** Semantic Kernel
-- **Infra local:** Docker Compose
+- [.NET 10 SDK](https://dotnet.microsoft.com/)
+- [Node.js 22+](https://nodejs.org/) e npm 10+
+- [Git](https://git-scm.com/)
+- [Docker](https://www.docker.com/) e Docker Compose *(opcional para execução local em containers)*
 
-## 🚀 Como começar
+---
+
+## 🚀 Comandos de Desenvolvimento
+
+### Backend (.NET 10)
+
+Executar a partir do diretório `backend/`:
 
 ```bash
-git clone https://github.com/CunhaRo/YupAchei.git
-cd YupAchei
+# Restaurar dependências
+dotnet restore
 
-# Criar os projetos .NET dentro das pastas existentes (referenciados em YupAchei.sln)
-dotnet new classlib -n YupAchei.Domain -o src/YupAchei.Domain
-dotnet new classlib -n YupAchei.Application -o src/YupAchei.Application
-dotnet new classlib -n YupAchei.Infrastructure -o src/YupAchei.Infrastructure
-dotnet new classlib -n YupAchei.Services -o src/YupAchei.Services
-dotnet new webapi  -n YupAchei.WebApi -o src/YupAchei.WebApi
+# Compilar a solução completa
+dotnet build
 
-# Criar o frontend
-npm create vite@latest src/YupAchei.Client -- --template react-ts
+# Executar a suíte de testes (unitários e de integração)
+dotnet test
 
-# Subir o ambiente
+# Executar a API em modo de desenvolvimento
+dotnet run --project src/YupAchei.API
+```
+
+### Frontend (React + TypeScript / Vite)
+
+Executar a partir do diretório `frontend/`:
+
+```bash
+# Instalar dependências
+npm install
+
+# Iniciar servidor de desenvolvimento local
+npm run dev
+
+# Checagem de tipos e compilação de produção
+npm run build
+
+# Executar análise estática (linter)
+npm run lint
+```
+
+### Docker Compose
+
+> ⚠️ **Status:** *Estrutura descritiva inicial configurada. A validação completa da execução dos containers em ambiente integrado está pendente de definição de infraestrutura e serviços adicionais.*
+
+```bash
+# Construção e inicialização dos serviços (quando os requisitos forem consolidados)
+docker compose build
 docker compose up -d
 ```
 
-Portas: WebApi `5000`, Client `5173`, PostgreSQL `5432`.
+---
 
-> ⚠️ As credenciais do `docker-compose.yml` (`changeme`) são placeholders — altere-as em ambientes reais.
+## 🧪 Estratégia de Testes
 
-## 📋 Gestão do projeto
+Consulte o documento [docs/development/testing.md](docs/development/testing.md) para detalhes sobre a organização e execução de testes.
 
-Board Jira: https://yupachei.atlassian.net/jira/software/projects/KAN/list
+---
+
+## 📖 Documentação Adicional
+
+- [Contexto do Projeto](CONTEXT.md)
+- [Regras para Agentes](AGENTS.md)
+- [Visão Geral da Arquitetura](docs/architecture/overview.md)
+- [Arquitetura do Backend](docs/architecture/backend.md)
+- [Arquitetura do Frontend](docs/architecture/frontend.md)
+- [Fluxo de Desenvolvimento](docs/development/workflow.md)
+
