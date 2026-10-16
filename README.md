@@ -6,7 +6,7 @@
 - Conteúdo fornecido por parceiros e influenciadores digitais
 - Recomendações inteligentes via LLM/Agente (opcional no MVP)
 
-## 🏗️ Arquitetura (Clean Architecture / DDD)
+## Arquitetura (Clean Architecture / DDD) Vai mudar aqui***
 
 ```
  ┌──────────────────────────┐
