@@ -1,48 +1,29 @@
 services:
-  webapi:
-    image: mcr.microsoft.com/dotnet/aspnet:8.0
-    container_name: yupachei-webapi
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: yupachei-backend
     ports:
       - "5000:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=yupachei;Username=yupachei;Password=changeme
-    depends_on:
-      - postgres
     networks:
       - yupachei-net
 
-  postgres:
-    image: postgres:16-alpine
-    container_name: yupachei-postgres
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: yupachei-frontend
     ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_DB=yupachei
-      - POSTGRES_USER=yupachei
-      - POSTGRES_PASSWORD=changeme
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - yupachei-net
-
-  client:
-    image: node:20-alpine
-    container_name: yupachei-client
-    working_dir: /app/src/YupAchei.Client
-    volumes:
-      - ./:/app
-    command: sh -c "npm install && npm run dev -- --host"
-    ports:
-      - "5173:5173"
+      - "3000:80"
     depends_on:
-      - webapi
+      - backend
     networks:
       - yupachei-net
-
-volumes:
-  postgres-data:
 
 networks:
   yupachei-net:
     driver: bridge
+
