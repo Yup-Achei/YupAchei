@@ -1,0 +1,29 @@
+@import 'tailwindcss';
+
+/* Tokens da marca. Cada --color-* vira utilitário: bg-brand, text-brand-light, etc. */
+@theme {
+  --color-brand: #863bff;
+  --color-brand-hover: #722fe0;
+  --color-brand-light: #f3ebff;
+  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+    background-color: #fff;
+    color: #111827;
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: #fff;
+  }
+}

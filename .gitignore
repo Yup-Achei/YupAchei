@@ -1,21 +1,57 @@
-# .NET
+# Segredos e Variáveis de Ambiente
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+
+# .NET / C#
 bin/
 obj/
 *.user
+*.userosscache
 *.suo
+*.userprefs
+*.pidb
+*.sln.docstates
 .vs/
-.vscode/
-*.rsuser
 TestResults/
+*.trx
+*.coverage
+*.coveragexml
 appsettings.*.json
 !appsettings.json
-# Node.js
+!appsettings.Development.json
+
+# Node / Vite / Frontend
 node_modules/
 dist/
-.env
-.env.local
-.env.*.local
+dist-ssr/
+build/
+*.local
 npm-debug.log*
-# OS
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# IDEs e Editores
+.cursor/
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.*~
+
+# Logs, Temporários e Sistema Operacional
+*.log
 .DS_Store
 Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+

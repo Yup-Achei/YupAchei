@@ -1,0 +1,6 @@
+@YupAchei.API_HostAddress = http://localhost:5244
+
+GET {{YupAchei.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
