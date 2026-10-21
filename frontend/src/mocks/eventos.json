@@ -1,0 +1,91 @@
+[
+  {
+    "id": "evt-001", "slug": "feira-de-artesanato-mercado-cultural", "simulado": true,
+    "titulo": "Feira de Artesanato Regional", "categoriaId": "cultura",
+    "descricao": "[SIMULADO] Caso de teste: evento JÁ VENCIDO, não deve aparecer na listagem.",
+    "inicio": "2026-10-10T17:00:00-04:00", "fim": "2026-10-10T22:00:00-04:00",
+    "localId": "loc-010", "localLivre": null,
+    "preco": { "gratuito": true, "valorMinimo": null, "moeda": "BRL" },
+    "linkIngresso": null, "imagem": "https://picsum.photos/seed/evtartesanato/800/600",
+    "organizador": { "nome": "Organizador simulado", "tipoDocumento": "MEI", "documento": "00.000.000/0001-01" },
+    "tags": ["gratuito", "familia"], "destaque": false, "patrocinado": false, "status": "aprovado"
+  },
+  {
+    "id": "evt-002", "slug": "cinema-ao-ar-livre-caixas-dagua", "simulado": true,
+    "titulo": "Cinema ao Ar Livre", "categoriaId": "cultura",
+    "descricao": "[SIMULADO] Sessão gratuita de cinema na praça. Leve cadeira ou canga.",
+    "inicio": "2026-10-24T19:00:00-04:00", "fim": "2026-10-24T21:30:00-04:00",
+    "localId": "loc-002", "localLivre": null,
+    "preco": { "gratuito": true, "valorMinimo": null, "moeda": "BRL" },
+    "linkIngresso": null, "imagem": "https://picsum.photos/seed/evtcinema/800/600",
+    "organizador": { "nome": "Organizador simulado", "tipoDocumento": "MEI", "documento": "00.000.000/0001-02" },
+    "tags": ["gratuito", "familia", "ar-livre"], "destaque": true, "patrocinado": false, "status": "aprovado"
+  },
+  {
+    "id": "evt-003", "slug": "feira-gastronomica-efmm", "simulado": true,
+    "titulo": "Feira Gastronômica Beira-Rio", "categoriaId": "gastronomia",
+    "descricao": "[SIMULADO] Food trucks, comida regional e música ao vivo no Complexo da EFMM.",
+    "inicio": "2026-10-31T16:00:00-04:00", "fim": "2026-10-31T23:00:00-04:00",
+    "localId": "loc-001", "localLivre": null,
+    "preco": { "gratuito": true, "valorMinimo": null, "moeda": "BRL" },
+    "linkIngresso": null, "imagem": "https://picsum.photos/seed/evtgastro/800/600",
+    "organizador": { "nome": "Organizador simulado", "tipoDocumento": "CNPJ", "documento": "00.000.000/0001-03" },
+    "tags": ["gratuito", "familia", "por-do-sol", "musica-ao-vivo", "comida-regional"], "destaque": true, "patrocinado": true, "status": "aprovado"
+  },
+  {
+    "id": "evt-004", "slug": "exposicao-arte-amazonica-casa-da-cultura", "simulado": true,
+    "titulo": "Exposição Arte Amazônica", "categoriaId": "cultura",
+    "descricao": "[SIMULADO] Caso de teste: evento de VÁRIOS DIAS (exposição).",
+    "inicio": "2026-11-03T09:00:00-04:00", "fim": "2026-12-20T17:00:00-04:00",
+    "localId": "loc-012", "localLivre": null,
+    "preco": { "gratuito": true, "valorMinimo": null, "moeda": "BRL" },
+    "linkIngresso": null, "imagem": "https://picsum.photos/seed/evtexposicao/800/600",
+    "organizador": { "nome": "Organizador simulado", "tipoDocumento": "MEI", "documento": "00.000.000/0001-04" },
+    "tags": ["gratuito", "familia"], "destaque": false, "patrocinado": false, "status": "aprovado"
+  },
+  {
+    "id": "evt-005", "slug": "espetaculo-teatro-guapore", "simulado": true,
+    "titulo": "Espetáculo: Histórias do Madeira", "categoriaId": "teatro",
+    "descricao": "[SIMULADO] Peça regional sobre a história de Porto Velho. Classificação livre.",
+    "inicio": "2026-11-07T19:30:00-04:00", "fim": "2026-11-07T21:00:00-04:00",
+    "localId": "loc-011", "localLivre": null,
+    "preco": { "gratuito": false, "valorMinimo": 30.0, "moeda": "BRL" },
+    "linkIngresso": "https://exemplo.com/ingresso/historias-do-madeira", "imagem": "https://picsum.photos/seed/evtteatro/800/600",
+    "organizador": { "nome": "Organizador simulado", "tipoDocumento": "MEI", "documento": "00.000.000/0001-05" },
+    "tags": ["familia"], "destaque": false, "patrocinado": false, "status": "aprovado"
+  },
+  {
+    "id": "evt-006", "slug": "corrida-noturna-parque-circuito", "simulado": true,
+    "titulo": "Corrida Noturna 5K", "categoriaId": "esportes",
+    "descricao": "[SIMULADO] Corrida de 5 km com kit e medalha. Evento com título e descrição longos pra testar a quebra de linha no card do front-end.",
+    "inicio": "2026-11-14T19:00:00-04:00", "fim": "2026-11-14T21:30:00-04:00",
+    "localId": "loc-006", "localLivre": null,
+    "preco": { "gratuito": false, "valorMinimo": 60.0, "moeda": "BRL" },
+    "linkIngresso": "https://exemplo.com/inscricao/corrida-5k", "imagem": "https://picsum.photos/seed/evtcorrida/800/600",
+    "organizador": { "nome": "Organizador simulado", "tipoDocumento": "CNPJ", "documento": "00.000.000/0001-06" },
+    "tags": ["ar-livre"], "destaque": false, "patrocinado": false, "status": "aprovado"
+  },
+  {
+    "id": "evt-007", "slug": "show-regional-mercado-cultural", "simulado": true,
+    "titulo": "Noite de Música Regional", "categoriaId": "musica",
+    "descricao": "[SIMULADO] Bandas locais no Mercado Cultural.",
+    "inicio": "2026-11-20T19:00:00-04:00", "fim": "2026-11-20T23:30:00-04:00",
+    "localId": "loc-010", "localLivre": null,
+    "preco": { "gratuito": true, "valorMinimo": null, "moeda": "BRL" },
+    "linkIngresso": null, "imagem": "https://picsum.photos/seed/evtmusica/800/600",
+    "organizador": { "nome": "Organizador simulado", "tipoDocumento": "MEI", "documento": "00.000.000/0001-07" },
+    "tags": ["gratuito", "musica-ao-vivo"], "destaque": false, "patrocinado": false, "status": "aprovado"
+  },
+  {
+    "id": "evt-008", "slug": "forro-nos-mirantes", "simulado": true,
+    "titulo": "Forró nos Mirantes", "categoriaId": "festas",
+    "descricao": "[SIMULADO] Caso de teste: local NÃO cadastrado (usa localLivre).",
+    "inicio": "2026-11-21T20:00:00-04:00", "fim": "2026-11-22T01:00:00-04:00",
+    "localId": null,
+    "localLivre": { "nome": "Mirantes I, II e III", "endereco": null, "bairro": null, "coordenadas": { "lat": -8.7590, "lng": -63.9110 } },
+    "preco": { "gratuito": false, "valorMinimo": 20.0, "moeda": "BRL" },
+    "linkIngresso": null, "imagem": "https://picsum.photos/seed/evtforro/800/600",
+    "organizador": { "nome": "Organizador simulado", "tipoDocumento": "MEI", "documento": "00.000.000/0001-08" },
+    "tags": ["musica-ao-vivo", "vista-rio"], "destaque": false, "patrocinado": false, "status": "aprovado"
+  }
+]
