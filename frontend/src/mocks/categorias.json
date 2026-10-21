@@ -1,0 +1,82 @@
+[
+  {
+    "id": "cafeterias",
+    "nome": "Cafeterias",
+    "tipos": ["local"],
+    "icone": "coffee",
+    "cor": "#F59E0B",
+    "ordem": 1
+  },
+  {
+    "id": "restaurantes",
+    "nome": "Restaurantes",
+    "tipos": ["local"],
+    "icone": "utensils",
+    "cor": "#F97316",
+    "ordem": 2
+  },
+  {
+    "id": "bares",
+    "nome": "Bares",
+    "tipos": ["local"],
+    "icone": "beer",
+    "cor": "#8B5CF6",
+    "ordem": 3
+  },
+  {
+    "id": "cultura",
+    "nome": "Cultura",
+    "tipos": ["local", "evento"],
+    "icone": "palette",
+    "cor": "#3B82F6",
+    "ordem": 4
+  },
+  {
+    "id": "passeios",
+    "nome": "Passeios",
+    "tipos": ["local"],
+    "icone": "compass",
+    "cor": "#10B981",
+    "ordem": 5
+  },
+  {
+    "id": "esportes",
+    "nome": "Esportes",
+    "tipos": ["local", "evento"],
+    "icone": "dumbbell",
+    "cor": "#EF4444",
+    "ordem": 6
+  },
+  {
+    "id": "musica",
+    "nome": "Música",
+    "tipos": ["evento"],
+    "icone": "music",
+    "cor": "#EC4899",
+    "ordem": 7
+  },
+  {
+    "id": "festas",
+    "nome": "Festas",
+    "tipos": ["evento"],
+    "icone": "party-popper",
+    "cor": "#A855F7",
+    "ordem": 8
+  },
+  {
+    "id": "gastronomia",
+    "nome": "Gastronomia",
+    "tipos": ["evento"],
+    "icone": "chef-hat",
+    "cor": "#F97316",
+    "ordem": 9
+  },
+  {
+    "id": "teatro",
+    "nome": "Teatro",
+    "tipos": ["evento"],
+    "icone": "drama",
+    "cor": "#6366F1",
+    "ordem": 10
+  }
+]

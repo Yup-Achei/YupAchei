@@ -1,0 +1,18 @@
+[
+  { "id": "gratuito", "nome": "Gratuito", "icone": "tag" },
+  { "id": "familia", "nome": "Bom pra família", "icone": "baby" },
+  { "id": "pet-friendly", "nome": "Pet friendly", "icone": "dog" },
+  { "id": "sem-pets", "nome": "Não aceita pets", "icone": "ban" },
+  { "id": "acessivel", "nome": "Acessível", "icone": "accessibility" },
+  { "id": "estacionamento", "nome": "Estacionamento", "icone": "car" },
+  { "id": "wifi", "nome": "Wi-Fi", "icone": "wifi" },
+  { "id": "musica-ao-vivo", "nome": "Música ao vivo", "icone": "mic" },
+  { "id": "ar-livre", "nome": "Ao ar livre", "icone": "trees" },
+  { "id": "por-do-sol", "nome": "Pôr do sol", "icone": "sunset" },
+  { "id": "vista-rio", "nome": "Vista pro rio", "icone": "waves" },
+  { "id": "comida-regional", "nome": "Comida regional", "icone": "fish" },
+  { "id": "vegano", "nome": "Opções veganas", "icone": "leaf" },
+  { "id": "trabalhar", "nome": "Bom pra trabalhar", "icone": "laptop" },
+  { "id": "historico", "nome": "Histórico", "icone": "landmark" },
+  { "id": "climatizado", "nome": "Climatizado", "icone": "snowflake" }
+]
