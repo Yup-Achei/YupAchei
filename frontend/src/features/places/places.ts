@@ -116,3 +116,21 @@ export function listPlaces(): readonly Place[] {
 export function findPlace(id: string): Place | null {
   return listPlaces().find((place) => place.id === id) ?? null
 }
+
+export function listPlacesByCategory(categoriaId: string, bairro?: string): readonly Place[] {
+  const inCategory = listPlaces().filter((place) => place.categoriaId === categoriaId)
+
+  if (!bairro) {
+    return inCategory
+  }
+
+  return inCategory.filter((place) => place.endereco.bairro === bairro)
+}
+
+export function listNeighborhoods(categoriaId: string): string[] {
+  const names = listPlacesByCategory(categoriaId)
+    .map((place) => place.endereco.bairro)
+    .filter((bairro): bairro is string => bairro !== null)
+
+  return [...new Set(names)].sort((a, b) => a.localeCompare(b, 'pt-BR'))
+}

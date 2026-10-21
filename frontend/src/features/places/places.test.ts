@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { findPlace, listPlaces } from '@/features/places/places'
+import { findPlace, listPlaces, listPlacesByCategory, listNeighborhoods } from '@/features/places/places'
 
 describe('locais', () => {
   it('lista só os locais aprovados', () => {
@@ -18,5 +18,21 @@ describe('locais', () => {
       categoriaId: 'cultura',
     })
     expect(findPlace('loc-009')).toBeNull()
+  })
+
+  it('lista os locais aprovados de uma categoria', () => {
+    expect(listPlacesByCategory('restaurantes').map((place) => place.id)).toEqual([
+      'loc-016',
+      'loc-017',
+    ])
+  })
+
+  it('filtra os locais da categoria por bairro', () => {
+    expect(listPlacesByCategory('passeios', 'Centro').map((place) => place.id)).toEqual([
+      'loc-002',
+      'loc-003',
+      'loc-014',
+    ])
+    expect(listNeighborhoods('passeios')).toEqual(['Centro', 'Panair'])
   })
 })

@@ -108,3 +108,22 @@ export function listEvents(now = new Date()): readonly Event[] {
 export function findEvent(id: string, now = new Date()): Event | null {
   return listEvents(now).find((event) => event.id === id) ?? null
 }
+
+function dayKey(iso: string): string {
+  return iso.slice(0, 10)
+}
+
+
+export function listEventsByCategory(
+  categoriaId: string,
+  date?: string,
+  now = new Date(),
+): readonly Event[] {
+  const inCategory = listEvents(now).filter((event) => event.categoriaId === categoriaId)
+  if (!date) {
+    return inCategory
+  }
+  return inCategory.filter(
+    (event) => dayKey(event.inicio) <= date && date <= dayKey(event.fim),
+  )
+}
