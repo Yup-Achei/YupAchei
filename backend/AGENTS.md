@@ -49,17 +49,23 @@ A solução adota rigorosamente a **Clean Architecture**:
 
 ---
 
-## 3. Testes Automatizados
+## 3. Testes Automatizados e Estratégia de Testes
 
-- **`YupAchei.Domain.Tests`:** Testes unitários puros das entidades e regras de domínio (sem mocks complexos nem banco de dados).
-- **`YupAchei.Application.Tests`:** Testes unitários dos casos de uso, utilizando substitutos (mocks/fakes) para interfaces de infraestrutura.
-- **`YupAchei.IntegrationTests`:** Testes de integração cobrindo fluxos completos da API (`WebApplicationFactory`), persistência e integração entre camadas.
+A suíte de testes no backend segue rigorosamente a Clean Architecture, sem introdução de dependências de teste desnecessárias:
+
+- **`YupAchei.Domain.Tests`:** Testes unitários puros das entidades, Value Objects e invariantes de regras de negócio (execução ultrarrápida, puramente em memória, sem I/O nem dependências externas).
+- **`YupAchei.Application.Tests`:** Testes unitários de serviços/casos de uso (ex.: `CatalogoService`, `RecomendacaoService`).
+  - **Diretriz de Dublês:** Adotar **Fakes leves em memória** (implementações simples das interfaces de repositório como `ILugarRepository`, `IEventoRepository`), sem adicionar bibliotecas de mocking (como Moq ou NSubstitute) por padrão.
+  - Reutilizar fakes existentes (como os de `Infrastructure`) somente quando não criar acoplamento indevido ou circular entre projetos; caso contrário, crie fakes locais focados no cenário do teste.
+- **`YupAchei.IntegrationTests`:** Testes de integração de ponta a ponta da API via `WebApplicationFactory<Program>`.
+  - **Infraestrutura:** Utiliza a infraestrutura em memória existente e o `InMemoryCatalogoSeeder`, dispensando containers Docker ou bancos externos.
+  - **Foco:** Validar contratos HTTP reais, roteamento Minimal API, serialização/deserialização JSON, políticas de cache de saída (`OutputCache`) e códigos de status (`200 OK`, `400 BadRequest` para `DomainException`, `404 NotFound`).
 
 Comandos para validação:
 ```bash
-dotnet build
-dotnet test
+dotnet build backend/YupAchei.sln
+dotnet test backend/YupAchei.sln
 ```
 
-Consulte [docs/architecture/backend.md](../docs/architecture/backend.md) para detalhes arquiteturais completos.
+Consulte [docs/development/testing.md](../docs/development/testing.md) e [docs/architecture/backend.md](../docs/architecture/backend.md) para especificações completas.
 
