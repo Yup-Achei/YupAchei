@@ -1,8 +1,5 @@
 namespace YupAchei.Domain.Enums;
 
-/// <summary>
-/// Categorias oficiais do catálogo para locais e eventos (alinhadas com categorias.json).
-/// </summary>
 public enum CategoriaLugar
 {
     Cafeterias = 1,
@@ -25,12 +22,7 @@ public enum TipoLugar
 
 public enum StatusPublicacao
 {
-    Aprovado = 1,
-    EmRevisao = 2
-}
-
-public enum TipoDocumentoOrganizador
-{
-    Mei = 1,
-    Cnpj = 2
+    EmRevisao = 1,
+    Aprovado = 2,
+    Rejeitado = 3
 }

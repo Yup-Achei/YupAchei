@@ -137,11 +137,11 @@ public sealed class CatalogoService : ICatalogoService
         }
 
         var ativos = await _eventoRepository.BuscarAtivosAsync(new EventSearchCriteria(), cancellationToken);
-        var porSlug = ativos.FirstOrDefault(e =>
-            string.Equals(e.Slug, idOuSlug.Trim(), StringComparison.OrdinalIgnoreCase) ||
+        var porSlogan = ativos.FirstOrDefault(e =>
+            string.Equals(e.Slogan, idOuSlug.Trim(), StringComparison.OrdinalIgnoreCase) ||
             string.Equals(e.Id.ToString(), idOuSlug.Trim(), StringComparison.OrdinalIgnoreCase));
 
-        return porSlug is null ? null : MapearEventoParaDto(porSlug);
+        return porSlogan is null ? null : MapearEventoParaDto(porSlogan);
     }
 
     internal static LugarDto MapearLugarParaDto(Lugar lugar, DateTimeOffset referencia)
@@ -154,7 +154,7 @@ public sealed class CatalogoService : ICatalogoService
 
         return new LugarDto(
             Id: lugar.Id.ToString(),
-            Slug: lugar.Slogan,
+            Slogan: lugar.Slogan,
             Nome: lugar.Nome,
             CategoriaId: MapearCategoriaParaSlug(lugar.Categoria),
             Tipo: lugar.Tipo == TipoLugar.Publico ? "publico" : "comercial",
@@ -167,7 +167,11 @@ public sealed class CatalogoService : ICatalogoService
                 lugar.Endereco.Estado,
                 lugar.Endereco.Cep),
             Coordenadas: new CoordenadasDto(lugar.Coordenadas.Latitude, lugar.Coordenadas.Longitude),
-            FaixaPreco: lugar.FaixaPreco,
+            FaixaPreco: new FaixaPrecoDto(
+                lugar.FaixaPreco.Gratuito,
+                lugar.FaixaPreco.ValorMinimo,
+                lugar.FaixaPreco.ValorMaximo,
+                lugar.FaixaPreco.Moeda),
             Aberto24h: lugar.Aberto24h,
             AbertoAgora: lugar.EstaAbertoEm(referencia),
             Horarios: lugar.HorarioFuncionamento.Horarios
@@ -189,17 +193,18 @@ public sealed class CatalogoService : ICatalogoService
             AvaliacoesParceiros: lugar.AvaliacoesParceiros
                 .Select(p => new AvaliacaoParceiroDto(
                     p.Id,
-                    p.NomeParceiro,
-                    p.UrlAvatar,
-                    p.RedeSocial.ToString().ToLowerInvariant(),
-                    p.UrlPerfilSocial,
+                    p.ParceiroId,
+                    p.Parceiro?.Nome,
+                    p.Parceiro?.UrlAvatar,
+                    p.Parceiro?.RedeSocial.ToString().ToLowerInvariant(),
+                    p.Parceiro?.UrlPerfilSocial,
                     p.SeloOuNota,
                     p.ComentarioCurto,
                     p.EmDestaque))
                 .ToList(),
             IndicadoPor: lugar.IndicadoPor,
             Patrocinado: lugar.Patrocinado,
-            Status: lugar.Status == StatusPublicacao.Aprovado ? "aprovado" : "em_revisao",
+            Status: MapearStatus(lugar.Status),
             Verificacao: new VerificacaoDto(
                 lugar.Verificacao.EnderecoVerificado,
                 lugar.Verificacao.HorarioVerificado,
@@ -215,7 +220,7 @@ public sealed class CatalogoService : ICatalogoService
 
         return new EventoDto(
             Id: evento.Id.ToString(),
-            Slug: evento.Slug,
+            Slogan: evento.Slogan,
             Simulado: evento.Simulado,
             Titulo: evento.Titulo,
             CategoriaId: MapearCategoriaParaSlug(evento.Categoria),
@@ -230,9 +235,10 @@ public sealed class CatalogoService : ICatalogoService
                     evento.LocalLivre.Endereco,
                     evento.LocalLivre.Bairro,
                     new CoordenadasDto(evento.LocalLivre.Coordenadas.Latitude, evento.LocalLivre.Coordenadas.Longitude)),
-            Preco: new PrecoEventoDto(
+            FaixaPreco: new FaixaPrecoDto(
                 evento.FaixaPreco.Gratuito,
-                evento.FaixaPreco.Gratuito ? null : evento.FaixaPreco.ValorMinimo,
+                evento.FaixaPreco.ValorMinimo,
+                evento.FaixaPreco.ValorMaximo,
                 evento.FaixaPreco.Moeda),
             LinkIngresso: evento.TicketUrl,
             Imagem: imagem,
@@ -240,12 +246,12 @@ public sealed class CatalogoService : ICatalogoService
                 ? null
                 : new OrganizadorDto(
                     evento.Organizador.Nome,
-                    evento.Organizador.TipoDocumento == TipoDocumentoOrganizador.Mei ? "MEI" : "CNPJ",
-                    evento.Organizador.Documento),
+                    evento.Organizador.ContatoPublico,
+                    evento.Organizador.Verificado),
             Tags: evento.EtiquetasClima,
             Destaque: evento.Destaque,
             Patrocinado: evento.Patrocinado,
-            Status: evento.Status == StatusPublicacao.Aprovado ? "aprovado" : "em_revisao");
+            Status: MapearStatus(evento.Status));
     }
 
     public static string MapearCategoriaParaSlug(CategoriaLugar categoria) => categoria switch
@@ -278,6 +284,13 @@ public sealed class CatalogoService : ICatalogoService
             "teatro" => CategoriaLugar.Teatro,
             _ => null
         };
+
+    private static string MapearStatus(StatusPublicacao status) => status switch
+    {
+        StatusPublicacao.Aprovado => "aprovado",
+        StatusPublicacao.Rejeitado => "rejeitado",
+        _ => "em_revisao"
+    };
 
     private static string MapearDiaSemana(DayOfWeek dia) => dia switch
     {

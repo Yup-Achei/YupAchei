@@ -20,7 +20,7 @@ public sealed class Evento : AggregateRoot
     private readonly List<string> _etiquetasClima = [];
     private readonly List<MediaAsset> _fotos = [];
 
-    public string Slug { get; private set; }
+    public string Slogan { get; private set; }
     public bool Simulado { get; private set; }
     public string Titulo { get; private set; }
     public CategoriaLugar Categoria { get; private set; }
@@ -45,7 +45,7 @@ public sealed class Evento : AggregateRoot
 
     private Evento(
         string titulo,
-        string slug,
+        string slogan,
         CategoriaLugar categoria,
         string descricao,
         DateTimeOffset dataInicio,
@@ -60,7 +60,6 @@ public sealed class Evento : AggregateRoot
         bool destaque,
         bool patrocinado,
         bool simulado,
-        StatusPublicacao status,
         Guid? id) : base(id ?? Guid.NewGuid())
     {
         if (string.IsNullOrWhiteSpace(titulo))
@@ -68,9 +67,9 @@ public sealed class Evento : AggregateRoot
             throw new DomainException("O título do evento é obrigatório.");
         }
 
-        if (string.IsNullOrWhiteSpace(slug))
+        if (string.IsNullOrWhiteSpace(slogan))
         {
-            throw new DomainException("O slug do evento é obrigatório.");
+            throw new DomainException("O slogan do evento é obrigatório.");
         }
 
         if (!CategoriasValidasEvento.Contains(categoria))
@@ -99,7 +98,7 @@ public sealed class Evento : AggregateRoot
         ArgumentNullException.ThrowIfNull(faixaPreco);
 
         Titulo = titulo.Trim();
-        Slug = slug.Trim().ToLowerInvariant();
+        Slogan = slogan.Trim().ToLowerInvariant();
         Categoria = categoria;
         Descricao = descricao.Trim();
         DataInicio = dataInicio;
@@ -112,7 +111,7 @@ public sealed class Evento : AggregateRoot
         Destaque = destaque;
         Patrocinado = patrocinado;
         Simulado = simulado;
-        Status = status;
+        Status = StatusPublicacao.EmRevisao;
         Ativo = true;
 
         if (etiquetasClima is not null)
@@ -139,13 +138,12 @@ public sealed class Evento : AggregateRoot
         string? ticketUrl = null,
         IEnumerable<string>? etiquetasClima = null,
         IEnumerable<MediaAsset>? fotos = null,
-        string? slug = null,
+        string? slogan = null,
         CategoriaLugar categoria = CategoriaLugar.Cultura,
         OrganizadorEvento? organizador = null,
         bool destaque = false,
         bool patrocinado = false,
         bool simulado = false,
-        StatusPublicacao status = StatusPublicacao.Aprovado,
         Guid? id = null)
     {
         if (lugarId == Guid.Empty)
@@ -155,7 +153,7 @@ public sealed class Evento : AggregateRoot
 
         return new Evento(
             titulo,
-            slug ?? GerarSlugPadrao(titulo),
+            slogan ?? GerarSloganPadrao(titulo),
             categoria,
             descricao,
             dataInicio,
@@ -170,7 +168,6 @@ public sealed class Evento : AggregateRoot
             destaque,
             patrocinado,
             simulado,
-            status,
             id);
     }
 
@@ -184,20 +181,19 @@ public sealed class Evento : AggregateRoot
         string? ticketUrl = null,
         IEnumerable<string>? etiquetasClima = null,
         IEnumerable<MediaAsset>? fotos = null,
-        string? slug = null,
+        string? slogan = null,
         CategoriaLugar categoria = CategoriaLugar.Cultura,
         OrganizadorEvento? organizador = null,
         bool destaque = false,
         bool patrocinado = false,
         bool simulado = false,
-        StatusPublicacao status = StatusPublicacao.Aprovado,
         Guid? id = null)
     {
         ArgumentNullException.ThrowIfNull(localLivre);
 
         return new Evento(
             titulo,
-            slug ?? GerarSlugPadrao(titulo),
+            slogan ?? GerarSloganPadrao(titulo),
             categoria,
             descricao,
             dataInicio,
@@ -212,9 +208,30 @@ public sealed class Evento : AggregateRoot
             destaque,
             patrocinado,
             simulado,
-            status,
             id);
     }
+
+    public void Aprovar()
+    {
+        if (Status == StatusPublicacao.Rejeitado)
+        {
+            throw new DomainException("Um evento rejeitado deve retornar para revisão antes de ser aprovado.");
+        }
+
+        Status = StatusPublicacao.Aprovado;
+    }
+
+    public void Rejeitar()
+    {
+        if (Status != StatusPublicacao.EmRevisao)
+        {
+            throw new DomainException("Apenas eventos em revisão podem ser rejeitados.");
+        }
+
+        Status = StatusPublicacao.Rejeitado;
+    }
+
+    public void ColocarEmRevisao() => Status = StatusPublicacao.EmRevisao;
 
     public bool EstaAtivoEm(DateTimeOffset dataHora) =>
         Ativo && Status == StatusPublicacao.Aprovado && dataHora >= DataInicio && dataHora <= DataFim;
@@ -222,7 +239,7 @@ public sealed class Evento : AggregateRoot
     public bool EstaDisponivelNaAgendaEm(DateTimeOffset agora) =>
         Ativo && Status == StatusPublicacao.Aprovado && DataFim >= agora;
 
-    private static string GerarSlugPadrao(string titulo) =>
+    private static string GerarSloganPadrao(string titulo) =>
         string.IsNullOrWhiteSpace(titulo)
             ? string.Empty
             : string.Join('-', titulo.Trim().ToLowerInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries));

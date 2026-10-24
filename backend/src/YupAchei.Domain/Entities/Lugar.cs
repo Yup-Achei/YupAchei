@@ -28,7 +28,7 @@ public sealed class Lugar : AggregateRoot
     public TipoLugar Tipo { get; private set; }
     public Address Endereco { get; private set; }
     public GeoCoordinates Coordenadas { get; private set; }
-    public int FaixaPreco { get; private set; }
+    public PriceRange FaixaPreco { get; private set; }
     public bool Aberto24h { get; private set; }
     public WeeklySchedule HorarioFuncionamento { get; private set; }
     public string? Observacoes { get; private set; }
@@ -59,12 +59,11 @@ public sealed class Lugar : AggregateRoot
         IEnumerable<string>? etiquetasClima = null,
         IEnumerable<MediaAsset>? fotos = null,
         TipoLugar tipo = TipoLugar.Comercial,
-        int faixaPreco = 0,
+        PriceRange? faixaPreco = null,
         bool aberto24h = false,
         string? observacoes = null,
         string indicadoPor = "Equipe Yup Achei",
         bool patrocinado = false,
-        StatusPublicacao status = StatusPublicacao.Aprovado,
         VerificacaoLugar? verificacao = null,
         DateTimeOffset? atualizadoEm = null,
         Guid? id = null) : base(id ?? Guid.NewGuid())
@@ -76,7 +75,7 @@ public sealed class Lugar : AggregateRoot
 
         if (string.IsNullOrWhiteSpace(slogan))
         {
-            throw new DomainException("O slogan/slug do lugar é obrigatório.");
+            throw new DomainException("O slogan do lugar é obrigatório.");
         }
 
         if (string.IsNullOrWhiteSpace(descricao))
@@ -89,29 +88,24 @@ public sealed class Lugar : AggregateRoot
             throw new DomainException($"A categoria '{categoria}' não é válida para um Lugar.");
         }
 
-        if (faixaPreco is < 0 or > 4)
-        {
-            throw new DomainException("A faixa de preço do lugar deve estar entre 0 e 4.");
-        }
-
         ArgumentNullException.ThrowIfNull(endereco);
         ArgumentNullException.ThrowIfNull(coordenadas);
 
         Nome = nome.Trim();
-        Slogan = slogan.Trim();
+        Slogan = slogan.Trim().ToLowerInvariant();
         Descricao = descricao.Trim();
         Categoria = categoria;
         Tipo = tipo;
         Endereco = endereco;
         Coordenadas = coordenadas;
-        FaixaPreco = faixaPreco;
+        FaixaPreco = faixaPreco ?? PriceRange.Gratis();
         Aberto24h = aberto24h;
         HorarioFuncionamento = horarioFuncionamento ?? WeeklySchedule.Vazia();
         Observacoes = string.IsNullOrWhiteSpace(observacoes) ? null : observacoes.Trim();
         Links = links ?? UsefulLinks.Vazio();
         IndicadoPor = string.IsNullOrWhiteSpace(indicadoPor) ? "Equipe Yup Achei" : indicadoPor.Trim();
         Patrocinado = patrocinado;
-        Status = status;
+        Status = StatusPublicacao.EmRevisao;
         Verificacao = verificacao ?? VerificacaoLugar.NaoVerificado();
         AtualizadoEm = atualizadoEm ?? DateTimeOffset.UtcNow;
         Ativo = true;
@@ -192,7 +186,26 @@ public sealed class Lugar : AggregateRoot
         QuantidadeAvaliacoes = totalAvaliacoes;
     }
 
-    public void Aprovar() => Status = StatusPublicacao.Aprovado;
+    public void Aprovar()
+    {
+        if (Status == StatusPublicacao.Rejeitado)
+        {
+            throw new DomainException("Um lugar rejeitado deve retornar para revisão antes de ser aprovado.");
+        }
+
+        Status = StatusPublicacao.Aprovado;
+    }
+
+    public void Rejeitar()
+    {
+        if (Status != StatusPublicacao.EmRevisao)
+        {
+            throw new DomainException("Apenas lugares em revisão podem ser rejeitados.");
+        }
+
+        Status = StatusPublicacao.Rejeitado;
+    }
+
     public void ColocarEmRevisao() => Status = StatusPublicacao.EmRevisao;
     public void Desativar() => Ativo = false;
     public void Ativar() => Ativo = true;
