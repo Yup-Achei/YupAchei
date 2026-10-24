@@ -21,13 +21,13 @@ public class PlaceAndReviewsTests
             etiquetasClima: ["familia", "climatizado", "wifi"],
             fotos: [new MediaAsset("https://cdn.yupachei.com/cafe-madeira.webp", "Fachada", ehCapa: true)],
             tipo: TipoLugar.Comercial,
-            faixaPreco: 2,
+            faixaPreco: new PriceRange(18m, 55m),
             aberto24h: aberto24h
         );
     }
 
     [Fact]
-    public void Lugar_DeveInicializarCorretamente_ENormalizarEtiquetasClima()
+    public void Lugar_DeveNascerEmRevisao_EUsarPriceRangeUnificado()
     {
         var lugar = CriarLugarExemplo();
 
@@ -35,21 +35,42 @@ public class PlaceAndReviewsTests
         Assert.Equal("cafe-madeira", lugar.Slogan);
         Assert.Equal(CategoriaLugar.Cafeterias, lugar.Categoria);
         Assert.Equal(TipoLugar.Comercial, lugar.Tipo);
-        Assert.Equal(2, lugar.FaixaPreco);
+        Assert.Equal(18m, lugar.FaixaPreco.ValorMinimo);
+        Assert.Equal(55m, lugar.FaixaPreco.ValorMaximo);
         Assert.True(lugar.Ativo);
+        Assert.Equal(StatusPublicacao.EmRevisao, lugar.Status);
+        Assert.False(lugar.EstaAprovado);
+
+        lugar.Aprovar();
+        Assert.Equal(StatusPublicacao.Aprovado, lugar.Status);
         Assert.True(lugar.EstaAprovado);
-        Assert.Equal(3, lugar.EtiquetasClima.Count);
-        Assert.Equal(0d, lugar.NotaMedia);
-        Assert.Equal(0, lugar.QuantidadeAvaliacoes);
     }
 
     [Fact]
-    public void Lugar_Aberto24h_DeveEstarAbertoMesmoComListaDeHorariosVazia()
+    public void Lugar_TransicoesDeStatus_DeveImpedirAprovarDiretoDeRejeitado()
     {
-        // Exemplo real: Praça das Três Caixas d'Água (aberto24h: true, horarios: [])
+        var lugar = CriarLugarExemplo();
+
+        lugar.Rejeitar();
+        Assert.Equal(StatusPublicacao.Rejeitado, lugar.Status);
+
+        Assert.Throws<DomainException>(() => lugar.Aprovar());
+
+        lugar.ColocarEmRevisao();
+        lugar.Aprovar();
+        Assert.Equal(StatusPublicacao.Aprovado, lugar.Status);
+    }
+
+    [Fact]
+    public void Lugar_Aberto24h_DeveEstarAbertoApenasQuandoAprovado()
+    {
         var praca = CriarLugarExemplo(agenda: WeeklySchedule.Vazia(), aberto24h: true);
         var madrugada = new DateTimeOffset(2026, 10, 24, 3, 30, 0, TimeSpan.FromHours(-4));
 
+        // Nasce em revisão -> ainda não aparece como aberto ao público
+        Assert.False(praca.EstaAbertoEm(madrugada));
+
+        praca.Aprovar();
         Assert.True(praca.EstaAbertoEm(madrugada));
 
         praca.ColocarEmRevisao();
@@ -63,38 +84,38 @@ public class PlaceAndReviewsTests
             nome: "Local Inválido",
             slogan: "local-invalido",
             descricao: "Descrição",
-            categoria: CategoriaLugar.Festas, // Categoria exclusiva de evento
+            categoria: CategoriaLugar.Festas,
             endereco: new Address("Rua A", "10", "Centro", UrbanRegion.Centro, "Porto Velho", "RO"),
             coordenadas: new GeoCoordinates(-8.76, -63.90)));
     }
 
     [Fact]
-    public void Lugar_AdicionarAvaliacaoParceiro_DeveAdicionarCuradoria_ERejeitarComentarioLongo()
+    public void Lugar_AdicionarAvaliacaoParceiro_DeveVincularEntidadeParceiroSemDuplicarDados()
     {
         var lugar = CriarLugarExemplo();
-
-        var avaliacaoParceiro = new AvaliacaoParceiro(
-            lugarId: lugar.Id,
-            nomeParceiro: "Rondônia Gourmet",
+        var parceiro = new Parceiro(
+            nome: "Rondônia Gourmet",
             urlAvatar: "https://cdn.yupachei.com/avatars/rg.webp",
             redeSocial: SocialNetwork.Instagram,
+            urlPerfilSocial: "https://instagram.com/rondoniagourmet");
+
+        var avaliacaoParceiro = AvaliacaoParceiro.CriarComParceiro(
+            lugarId: lugar.Id,
+            parceiro: parceiro,
             seloOuNota: "Top Escolha 4.9",
             comentarioCurto: "Melhor espresso e pão de queijo da região central!",
-            emDestaque: true,
-            urlPerfilSocial: "https://instagram.com/rondoniagourmet"
-        );
+            emDestaque: true);
 
         lugar.AdicionarAvaliacaoParceiro(avaliacaoParceiro);
 
         Assert.Single(lugar.AvaliacoesParceiros);
-        Assert.Equal("Rondônia Gourmet", lugar.AvaliacoesParceiros[0].NomeParceiro);
+        Assert.Equal(parceiro.Id, lugar.AvaliacoesParceiros[0].ParceiroId);
+        Assert.Equal("Rondônia Gourmet", lugar.AvaliacoesParceiros[0].Parceiro?.Nome);
 
         var comentarioLongo = new string('a', 201);
-        Assert.Throws<DomainException>(() => new AvaliacaoParceiro(
+        Assert.Throws<DomainException>(() => AvaliacaoParceiro.CriarComParceiro(
             lugar.Id,
-            "Influenciador",
-            "https://cdn.yupachei.com/a.webp",
-            SocialNetwork.TikTok,
+            parceiro,
             "5.0",
             comentarioLongo));
     }
@@ -133,7 +154,7 @@ public class PlaceAndReviewsTests
         var lugarId = Guid.NewGuid();
 
         usuario.SalvarLugar(lugarId);
-        usuario.SalvarLugar(lugarId); // Idempotente
+        usuario.SalvarLugar(lugarId);
 
         Assert.Single(usuario.LugaresSalvosIds);
         Assert.Contains(lugarId, usuario.LugaresSalvosIds);

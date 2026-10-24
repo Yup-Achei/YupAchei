@@ -1,4 +1,3 @@
-using YupAchei.Domain.Enums;
 using YupAchei.Domain.Exceptions;
 
 namespace YupAchei.Domain.ValueObjects;
@@ -35,29 +34,24 @@ public sealed record LocalLivre
 }
 
 /// <summary>
-/// Dados do organizador responsável por um evento (MEI ou CNPJ).
+/// Dados públicos do organizador responsável por um evento (adequado à LGPD, sem exposição de documento fiscal/pessoal).
 /// </summary>
 public sealed record OrganizadorEvento
 {
     public string Nome { get; }
-    public TipoDocumentoOrganizador TipoDocumento { get; }
-    public string Documento { get; }
+    public string? ContatoPublico { get; }
+    public bool Verificado { get; }
 
-    public OrganizadorEvento(string nome, TipoDocumentoOrganizador tipoDocumento, string documento)
+    public OrganizadorEvento(string nome, string? contatoPublico = null, bool verificado = false)
     {
         if (string.IsNullOrWhiteSpace(nome))
         {
             throw new DomainException("O nome do organizador do evento é obrigatório.");
         }
 
-        if (string.IsNullOrWhiteSpace(documento))
-        {
-            throw new DomainException("O documento do organizador do evento é obrigatório.");
-        }
-
         Nome = nome.Trim();
-        TipoDocumento = tipoDocumento;
-        Documento = documento.Trim();
+        ContatoPublico = string.IsNullOrWhiteSpace(contatoPublico) ? null : contatoPublico.Trim();
+        Verificado = verificado;
     }
 }
 

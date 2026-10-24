@@ -9,18 +9,39 @@ public static class InMemoryCatalogoSeeder
     public static readonly Guid IdEfmm = Guid.Parse("11111111-1111-1111-1111-111111111001");
     public static readonly Guid IdCaixasDagua = Guid.Parse("11111111-1111-1111-1111-111111111002");
     public static readonly Guid IdAluizioFerreira = Guid.Parse("11111111-1111-1111-1111-111111111003");
-    public static readonly Guid IdEspacoAlternativo = Guid.Parse("11111111-1111-1111-1111-111111111004");
     public static readonly Guid IdParqueDaCidade = Guid.Parse("11111111-1111-1111-1111-111111111005");
     public static readonly Guid IdParqueCircuito = Guid.Parse("11111111-1111-1111-1111-111111111006");
     public static readonly Guid IdMercadoCultural = Guid.Parse("11111111-1111-1111-1111-111111111010");
-    public static readonly Guid IdTeatroGuapore = Guid.Parse("11111111-1111-1111-1111-111111111011");
-    public static readonly Guid IdCasaDaCultura = Guid.Parse("11111111-1111-1111-1111-111111111012");
     public static readonly Guid IdCafeMadeira = Guid.Parse("11111111-1111-1111-1111-111111111020");
     public static readonly Guid IdRemansoDoTucunare = Guid.Parse("11111111-1111-1111-1111-111111111021");
     public static readonly Guid IdMiranteMadeiraBar = Guid.Parse("11111111-1111-1111-1111-111111111022");
 
     public static IReadOnlyList<Lugar> CriarLugaresIniciais()
     {
+        var parceiroGuiaPvh = new Parceiro(
+            "Guia Porto Velho",
+            "https://picsum.photos/seed/avatar1/120/120",
+            SocialNetwork.Instagram,
+            "https://instagram.com/guiaportovelho");
+
+        var parceiroRondoniaGourmet = new Parceiro(
+            "Rondônia Gourmet",
+            "https://picsum.photos/seed/avatar2/120/120",
+            SocialNetwork.Instagram,
+            "https://instagram.com/rondoniagourmet");
+
+        var parceiroSaboresNorte = new Parceiro(
+            "Sabores do Norte",
+            "https://picsum.photos/seed/avatar3/120/120",
+            SocialNetwork.Instagram,
+            "https://instagram.com/saboresdonorte");
+
+        var parceiroNoitePvh = new Parceiro(
+            "Noite PVH",
+            "https://picsum.photos/seed/avatar4/120/120",
+            SocialNetwork.TikTok,
+            "https://tiktok.com/@noitepvh");
+
         var horarioTerADom10As22 = new WeeklySchedule(
         [
             new DailyHours(DayOfWeek.Tuesday, new TimeOnly(10, 0), new TimeOnly(22, 0)),
@@ -60,19 +81,18 @@ public static class InMemoryCatalogoSeeder
             etiquetasClima: ["gratuito", "familia", "ar-livre", "por-do-sol", "vista-rio", "historico", "estacionamento"],
             fotos: [new MediaAsset("https://picsum.photos/seed/efmm/800/600", "Complexo EFMM", ehCapa: true)],
             tipo: TipoLugar.Publico,
-            faixaPreco: 0,
+            faixaPreco: PriceRange.Gratis(),
             aberto24h: false,
             observacoes: "Museu: quarta a domingo, 10h às 18h, gratuito com agendamento.",
             verificacao: new VerificacaoLugar(true, true, false, ["https://portalamazonia.com/turismo/museu-da-estrada-de-ferro-madeira-mamore-e-opcao-de-lazer-e-aprendizado-em-porto-velho/"]),
             id: IdEfmm);
         efmm.RecalcularNota(4.7, 312);
-        efmm.AdicionarAvaliacaoParceiro(new AvaliacaoParceiro(
+        efmm.AdicionarAvaliacaoParceiro(AvaliacaoParceiro.CriarComParceiro(
             efmm.Id,
-            "Guia Porto Velho",
-            "https://picsum.photos/seed/avatar1/120/120",
-            SocialNetwork.Instagram,
+            parceiroGuiaPvh,
             "Imperdível 4.9",
             "O pôr do sol mais bonito de Rondônia na beira do Rio Madeira."));
+        efmm.Aprovar();
 
         var caixasDagua = new Lugar(
             nome: "Praça das Três Caixas d'Água",
@@ -85,10 +105,11 @@ public static class InMemoryCatalogoSeeder
             etiquetasClima: ["gratuito", "familia", "ar-livre", "historico"],
             fotos: [new MediaAsset("https://picsum.photos/seed/caixasdagua/800/600", "Três Caixas d'Água", ehCapa: true)],
             tipo: TipoLugar.Publico,
-            faixaPreco: 0,
+            faixaPreco: PriceRange.Gratis(),
             aberto24h: true,
             id: IdCaixasDagua);
         caixasDagua.RecalcularNota(4.4, 2595);
+        caixasDagua.Aprovar();
 
         var aluizioFerreira = new Lugar(
             nome: "Praça Aluízio Ferreira",
@@ -100,10 +121,11 @@ public static class InMemoryCatalogoSeeder
             etiquetasClima: ["gratuito", "familia", "ar-livre"],
             fotos: [new MediaAsset("https://picsum.photos/seed/aluizioferreira/800/600", "Praça Aluízio Ferreira", ehCapa: true)],
             tipo: TipoLugar.Publico,
-            faixaPreco: 0,
+            faixaPreco: PriceRange.Gratis(),
             aberto24h: true,
             id: IdAluizioFerreira);
         aluizioFerreira.RecalcularNota(4.2, 2200);
+        aluizioFerreira.Aprovar();
 
         var parqueDaCidade = new Lugar(
             nome: "Parque da Cidade",
@@ -116,9 +138,10 @@ public static class InMemoryCatalogoSeeder
             etiquetasClima: ["gratuito", "ar-livre", "pet-friendly", "familia"],
             fotos: [new MediaAsset("https://picsum.photos/seed/parquedacidade/800/600", "Parque da Cidade", ehCapa: true)],
             tipo: TipoLugar.Publico,
-            faixaPreco: 0,
+            faixaPreco: PriceRange.Gratis(),
             id: IdParqueDaCidade);
         parqueDaCidade.RecalcularNota(4.5, 691);
+        parqueDaCidade.Aprovar();
 
         var parqueCircuito = new Lugar(
             nome: "Parque Circuito (Parque Dr. José Adelino)",
@@ -131,9 +154,10 @@ public static class InMemoryCatalogoSeeder
             etiquetasClima: ["gratuito", "ar-livre", "familia", "estacionamento"],
             fotos: [new MediaAsset("https://picsum.photos/seed/parquecircuito/800/600", "Parque Circuito", ehCapa: true)],
             tipo: TipoLugar.Publico,
-            faixaPreco: 0,
+            faixaPreco: PriceRange.Gratis(),
             id: IdParqueCircuito);
         parqueCircuito.RecalcularNota(4.6, 845);
+        parqueCircuito.Aprovar();
 
         var mercadoCultural = new Lugar(
             nome: "Mercado Cultural de Porto Velho",
@@ -146,9 +170,10 @@ public static class InMemoryCatalogoSeeder
             etiquetasClima: ["musica-ao-vivo", "comida-regional", "historico", "familia"],
             fotos: [new MediaAsset("https://picsum.photos/seed/mercadocultural/800/600", "Mercado Cultural", ehCapa: true)],
             tipo: TipoLugar.Publico,
-            faixaPreco: 2,
+            faixaPreco: new PriceRange(15m, 60m),
             id: IdMercadoCultural);
         mercadoCultural.RecalcularNota(4.5, 510);
+        mercadoCultural.Aprovar();
 
         var cafeMadeira = new Lugar(
             nome: "Café Madeira Especial",
@@ -162,16 +187,15 @@ public static class InMemoryCatalogoSeeder
             etiquetasClima: ["climatizado", "wifi", "trabalhar", "comida-regional"],
             fotos: [new MediaAsset("https://picsum.photos/seed/cafemadeira/800/600", "Café Madeira", ehCapa: true)],
             tipo: TipoLugar.Comercial,
-            faixaPreco: 2,
+            faixaPreco: new PriceRange(18m, 55m),
             id: IdCafeMadeira);
         cafeMadeira.RecalcularNota(4.8, 184);
-        cafeMadeira.AdicionarAvaliacaoParceiro(new AvaliacaoParceiro(
+        cafeMadeira.AdicionarAvaliacaoParceiro(AvaliacaoParceiro.CriarComParceiro(
             cafeMadeira.Id,
-            "Rondônia Gourmet",
-            "https://picsum.photos/seed/avatar2/120/120",
-            SocialNetwork.Instagram,
+            parceiroRondoniaGourmet,
             "Destaque 4.9",
             "Melhor café coado e tapioquinha com tucumã para começar a manhã!"));
+        cafeMadeira.Aprovar();
 
         var remansoTucunare = new Lugar(
             nome: "Remanso do Tucunaré",
@@ -185,16 +209,15 @@ public static class InMemoryCatalogoSeeder
             etiquetasClima: ["comida-regional", "climatizado", "estacionamento", "familia"],
             fotos: [new MediaAsset("https://picsum.photos/seed/remansotucunare/800/600", "Remanso do Tucunaré", ehCapa: true)],
             tipo: TipoLugar.Comercial,
-            faixaPreco: 3,
+            faixaPreco: new PriceRange(65m, 160m),
             id: IdRemansoDoTucunare);
         remansoTucunare.RecalcularNota(4.7, 290);
-        remansoTucunare.AdicionarAvaliacaoParceiro(new AvaliacaoParceiro(
+        remansoTucunare.AdicionarAvaliacaoParceiro(AvaliacaoParceiro.CriarComParceiro(
             remansoTucunare.Id,
-            "Sabores do Norte",
-            "https://picsum.photos/seed/avatar3/120/120",
-            SocialNetwork.Instagram,
+            parceiroSaboresNorte,
             "Top Jantar 4.8",
             "Ambiente intimista impecável para jantar a dois em Porto Velho."));
+        remansoTucunare.Aprovar();
 
         var miranteBar = new Lugar(
             nome: "Mirante Deck Bar",
@@ -208,16 +231,15 @@ public static class InMemoryCatalogoSeeder
             etiquetasClima: ["musica-ao-vivo", "por-do-sol", "vista-rio", "ar-livre"],
             fotos: [new MediaAsset("https://picsum.photos/seed/mirantebar/800/600", "Mirante Deck Bar", ehCapa: true)],
             tipo: TipoLugar.Comercial,
-            faixaPreco: 3,
+            faixaPreco: new PriceRange(35m, 120m),
             id: IdMiranteMadeiraBar);
         miranteBar.RecalcularNota(4.6, 215);
-        miranteBar.AdicionarAvaliacaoParceiro(new AvaliacaoParceiro(
+        miranteBar.AdicionarAvaliacaoParceiro(AvaliacaoParceiro.CriarComParceiro(
             miranteBar.Id,
-            "Noite PVH",
-            "https://picsum.photos/seed/avatar4/120/120",
-            SocialNetwork.TikTok,
+            parceiroNoitePvh,
             "Melhor Drink 4.8",
             "Melhor drink autoral de caju e jambu vendo o pôr do sol!"));
+        miranteBar.Aprovar();
 
         return
         [
@@ -237,8 +259,8 @@ public static class InMemoryCatalogoSeeder
     {
         var fuso = TimeSpan.FromHours(-4);
 
-        return
-        [
+        var eventos = new List<Evento>
+        {
             Evento.CriarParaLugar(
                 titulo: "Cinema ao Ar Livre",
                 descricao: "Sessão gratuita de cinema na praça. Leve cadeira ou canga.",
@@ -248,9 +270,9 @@ public static class InMemoryCatalogoSeeder
                 faixaPreco: PriceRange.Gratis(),
                 etiquetasClima: ["gratuito", "familia", "ar-livre"],
                 fotos: [new MediaAsset("https://picsum.photos/seed/evtcinema/800/600", "Cinema ao Ar Livre", ehCapa: true)],
-                slug: "cinema-ao-ar-livre-caixas-dagua",
+                slogan: "cinema-ao-ar-livre-caixas-dagua",
                 categoria: CategoriaLugar.Cultura,
-                organizador: new OrganizadorEvento("CineClube Beradero", TipoDocumentoOrganizador.Mei, "00.000.000/0001-02"),
+                organizador: new OrganizadorEvento("CineClube Beradero", "@cineclubeberadero", verificado: true),
                 destaque: true,
                 simulado: true),
 
@@ -263,9 +285,9 @@ public static class InMemoryCatalogoSeeder
                 faixaPreco: PriceRange.Gratis(),
                 etiquetasClima: ["gratuito", "familia", "por-do-sol", "musica-ao-vivo", "comida-regional"],
                 fotos: [new MediaAsset("https://picsum.photos/seed/evtgastro/800/600", "Feira Gastronômica", ehCapa: true)],
-                slug: "feira-gastronomica-efmm",
+                slogan: "feira-gastronomica-efmm",
                 categoria: CategoriaLugar.Gastronomia,
-                organizador: new OrganizadorEvento("Associação Gastronômica PVH", TipoDocumentoOrganizador.Cnpj, "00.000.000/0001-03"),
+                organizador: new OrganizadorEvento("Associação Gastronômica PVH", "@gastronomiapvh", verificado: true),
                 destaque: true,
                 patrocinado: true,
                 simulado: true),
@@ -280,9 +302,9 @@ public static class InMemoryCatalogoSeeder
                 ticketUrl: "https://exemplo.com/inscricao/corrida-5k",
                 etiquetasClima: ["ar-livre"],
                 fotos: [new MediaAsset("https://picsum.photos/seed/evtcorrida/800/600", "Corrida Noturna", ehCapa: true)],
-                slug: "corrida-noturna-parque-circuito",
+                slogan: "corrida-noturna-parque-circuito",
                 categoria: CategoriaLugar.Esportes,
-                organizador: new OrganizadorEvento("Run Rondônia", TipoDocumentoOrganizador.Cnpj, "00.000.000/0001-06"),
+                organizador: new OrganizadorEvento("Run Rondônia", "@runrondonia", verificado: true),
                 simulado: true),
 
             Evento.CriarParaLugar(
@@ -294,9 +316,9 @@ public static class InMemoryCatalogoSeeder
                 faixaPreco: PriceRange.Gratis(),
                 etiquetasClima: ["gratuito", "musica-ao-vivo"],
                 fotos: [new MediaAsset("https://picsum.photos/seed/evtmusica/800/600", "Música Regional", ehCapa: true)],
-                slug: "show-regional-mercado-cultural",
+                slogan: "show-regional-mercado-cultural",
                 categoria: CategoriaLugar.Musica,
-                organizador: new OrganizadorEvento("Coletivo Madeira", TipoDocumentoOrganizador.Mei, "00.000.000/0001-07"),
+                organizador: new OrganizadorEvento("Coletivo Madeira", "@coletivomadeira"),
                 simulado: true),
 
             Evento.CriarParaLocalLivre(
@@ -308,10 +330,17 @@ public static class InMemoryCatalogoSeeder
                 faixaPreco: PriceRange.APartirDe(20m),
                 etiquetasClima: ["musica-ao-vivo", "vista-rio"],
                 fotos: [new MediaAsset("https://picsum.photos/seed/evtforro/800/600", "Forró nos Mirantes", ehCapa: true)],
-                slug: "forro-nos-mirantes",
+                slogan: "forro-nos-mirantes",
                 categoria: CategoriaLugar.Festas,
-                organizador: new OrganizadorEvento("Forró do Rio", TipoDocumentoOrganizador.Mei, "00.000.000/0001-08"),
+                organizador: new OrganizadorEvento("Forró do Rio", "@forrodorio"),
                 simulado: true)
-        ];
+        };
+
+        foreach (var evento in eventos)
+        {
+            evento.Aprovar();
+        }
+
+        return eventos;
     }
 }

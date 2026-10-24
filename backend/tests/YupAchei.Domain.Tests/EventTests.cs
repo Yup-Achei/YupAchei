@@ -11,10 +11,10 @@ public class EventTests
     private static readonly DateTimeOffset DataFimPadrao = new(2026, 11, 22, 1, 0, 0, TimeSpan.FromHours(-4));
 
     [Fact]
-    public void Evento_ParaLugarCadastrado_DeveSerValidoComLugarId()
+    public void Evento_ParaLugarCadastrado_DeveNascerEmRevisao_EUsarSloganEOrganizadorSemDocumento()
     {
         var lugarId = Guid.NewGuid();
-        var organizador = new OrganizadorEvento("Produtora Cultural PVH", TipoDocumentoOrganizador.Cnpj, "00.000.000/0001-03");
+        var organizador = new OrganizadorEvento("Produtora Cultural PVH", "@produtorapvh", verificado: true);
 
         var evento = Evento.CriarParaLugar(
             titulo: "Feira Gastronômica Beira-Rio",
@@ -25,7 +25,7 @@ public class EventTests
             faixaPreco: PriceRange.Gratis(),
             ticketUrl: null,
             etiquetasClima: ["gratuito", "familia", "por-do-sol", "musica-ao-vivo"],
-            slug: "feira-gastronomica-efmm",
+            slogan: "feira-gastronomica-efmm",
             categoria: CategoriaLugar.Gastronomia,
             organizador: organizador,
             destaque: true,
@@ -34,9 +34,15 @@ public class EventTests
         Assert.True(evento.PossuiVinculoLugar);
         Assert.False(evento.PossuiLocalLivre);
         Assert.Equal("Feira Gastronômica Beira-Rio", evento.Titulo);
+        Assert.Equal("feira-gastronomica-efmm", evento.Slogan);
         Assert.Equal(CategoriaLugar.Gastronomia, evento.Categoria);
         Assert.Equal(lugarId, evento.LugarId);
         Assert.Null(evento.LocalLivre);
+        Assert.Equal(StatusPublicacao.EmRevisao, evento.Status);
+        Assert.False(evento.EstaDisponivelNaAgendaEm(DataInicioPadrao.AddDays(-5)));
+
+        evento.Aprovar();
+        Assert.Equal(StatusPublicacao.Aprovado, evento.Status);
         Assert.True(evento.EstaAtivoEm(DataInicioPadrao.AddHours(1)));
         Assert.True(evento.EstaDisponivelNaAgendaEm(DataInicioPadrao.AddDays(-5)));
         Assert.False(evento.EstaDisponivelNaAgendaEm(DataFimPadrao.AddMinutes(1)));
@@ -45,7 +51,6 @@ public class EventTests
     [Fact]
     public void Evento_ParaLocalLivre_DeveSuportarLocalSemEnderecoOuBairroFormal()
     {
-        // Caso real de eventos.json (evt-008: Forró nos Mirantes)
         var localLivre = new LocalLivre(
             nome: "Mirantes I, II e III",
             endereco: null,
@@ -60,12 +65,13 @@ public class EventTests
             localLivre: localLivre,
             faixaPreco: PriceRange.APartirDe(20m),
             etiquetasClima: ["musica-ao-vivo", "vista-rio"],
-            slug: "forro-nos-mirantes",
+            slogan: "forro-nos-mirantes",
             categoria: CategoriaLugar.Festas);
 
         Assert.False(evento.PossuiVinculoLugar);
         Assert.True(evento.PossuiLocalLivre);
         Assert.Null(evento.LugarId);
+        Assert.Equal("forro-nos-mirantes", evento.Slogan);
         Assert.Equal("Mirantes I, II e III", evento.NomeLocal);
         Assert.Equal(localLivre, evento.LocalLivre);
     }

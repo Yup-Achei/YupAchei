@@ -54,24 +54,31 @@ public sealed record VerificacaoDto(
 
 public sealed record AvaliacaoParceiroDto(
     Guid Id,
-    string NomeParceiro,
-    string UrlAvatar,
-    string RedeSocial,
+    Guid ParceiroId,
+    string? NomeParceiro,
+    string? UrlAvatar,
+    string? RedeSocial,
     string? UrlPerfilSocial,
     string SeloOuNota,
     string ComentarioCurto,
     bool EmDestaque);
 
+public sealed record FaixaPrecoDto(
+    bool Gratuito,
+    decimal ValorMinimo,
+    decimal ValorMaximo,
+    string Moeda);
+
 public sealed record LugarDto(
     string Id,
-    string Slug,
+    string Slogan,
     string Nome,
     string CategoriaId,
     string Tipo,
     string Descricao,
     EnderecoDto Endereco,
     CoordenadasDto Coordenadas,
-    int FaixaPreco,
+    FaixaPrecoDto FaixaPreco,
     bool Aberto24h,
     bool AbertoAgora,
     IReadOnlyList<HorarioFuncionamentoDto> Horarios,
@@ -93,19 +100,14 @@ public sealed record LocalLivreDto(
     string? Bairro,
     CoordenadasDto Coordenadas);
 
-public sealed record PrecoEventoDto(
-    bool Gratuito,
-    decimal? ValorMinimo,
-    string Moeda);
-
 public sealed record OrganizadorDto(
     string Nome,
-    string TipoDocumento,
-    string Documento);
+    string? ContatoPublico,
+    bool Verificado);
 
 public sealed record EventoDto(
     string Id,
-    string Slug,
+    string Slogan,
     bool Simulado,
     string Titulo,
     string CategoriaId,
@@ -114,7 +116,7 @@ public sealed record EventoDto(
     string Fim,
     string? LocalId,
     LocalLivreDto? LocalLivre,
-    PrecoEventoDto Preco,
+    FaixaPrecoDto FaixaPreco,
     string? LinkIngresso,
     string Imagem,
     OrganizadorDto? Organizador,
