@@ -27,17 +27,19 @@ A suíte de testes do projeto é estruturada de forma a balancear velocidade, is
 - **Isolamento:** Execução ultrarrápida, puramente em memória, sem dependência de banco de dados, mocks externos ou frameworks de I/O.
 
 ### 2.2 Testes Unitários de Aplicação (`YupAchei.Application.Tests`)
-- **Foco:** Orquestração de casos de uso (Handlers), validação de comandos e mapeamentos de DTOs.
-- **Isolamento:** Uso de dublês de teste (mocks/fakes) para simular interfaces de repositórios e serviços de infraestrutura.
+- **Foco:** Orquestração de casos de uso e serviços de aplicação (ex.: `CatalogoService`, `RecomendacaoService`), mapeamentos de DTOs e regras de conversão.
+- **Isolamento e Dublês:** Adotar **fakes leves em memória** implementando as interfaces de repositório (`ILugarRepository`, `IEventoRepository`, `IUserRepository`, etc.) baseados em coleções simples (`List<T>`).
+- **Política de Dependências:** Não adicionar bibliotecas externas de mocking (como Moq ou NSubstitute) por padrão, mantendo os testes simples, fáceis de refatorar e sem acoplamento a métodos de configuração de mock.
+- **Reutilização:** Reutilizar fakes existentes de `Infrastructure` (ex.: `InMemoryLugarRepository`) apenas quando não houver acoplamento indevido ou necessidade de controle fino de estado no teste; preferir fakes específicos no próprio projeto de teste quando o cenário exigir simulação de falhas ou isolamento estrito.
 
 ### 2.3 Testes de Integração (`YupAchei.IntegrationTests`)
-- **Foco:** Roteamento de endpoints HTTP, serialização/deserialização JSON, injeção de dependência e persistência real (usando containers de teste ou banco de dados em memória isolado).
-- **Ferramentas:** `Microsoft.AspNetCore.Mvc.Testing` (`WebApplicationFactory`).
+- **Foco:** Roteamento de endpoints Minimal API, serialização/deserialização JSON, tratamento global de erros (`DomainException` mapeado para `400 ProblemDetails`, `500` para erros não tratados), validação de cache de saída (`OutputCache` na política `CatalogoPublico`) e códigos de resposta HTTP (`200 OK`, `400 BadRequest`, `404 NotFound`).
+- **Infraestrutura e Ferramentas:** Utilizar `WebApplicationFactory<Program>` (do pacote `Microsoft.AspNetCore.Mvc.Testing`).
+- **Persistência Sem Dependências Externas:** A suíte deve rodar diretamente contra a infraestrutura em memória e o catálogo seedado (`InMemoryCatalogoSeeder`), sem exigir Docker, containers ou bancos de dados externos.
 
 **Execução:**
 ```bash
-cd backend
-dotnet test
+dotnet test backend/YupAchei.sln
 ```
 
 ---
@@ -58,4 +60,3 @@ npm test
 npm run build
 npm run lint
 ```
-
