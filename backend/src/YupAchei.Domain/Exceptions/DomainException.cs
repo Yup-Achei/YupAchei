@@ -2,11 +2,11 @@ namespace YupAchei.Domain.Exceptions;
 
 public sealed class DomainException : Exception
 {
-    public DomainException(string mensagem) : base(mensagem)
+    public DomainException(string message) : base(message)
     {
     }
 
-    public DomainException(string mensagem, Exception excecaoInterna) : base(mensagem, excecaoInterna)
+    public DomainException(string message, Exception innerException) : base(message, innerException)
     {
     }
 }

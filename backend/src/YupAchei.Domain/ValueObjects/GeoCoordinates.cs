@@ -4,7 +4,7 @@ namespace YupAchei.Domain.ValueObjects;
 
 public sealed record GeoCoordinates
 {
-    private const double RaioTerraKm = 6371.0;
+    private const double EarthRadiusKm = 6371.0;
 
     public double Latitude { get; }
     public double Longitude { get; }
@@ -25,22 +25,22 @@ public sealed record GeoCoordinates
         Longitude = longitude;
     }
 
-    public double CalcularDistanciaEmKmPara(GeoCoordinates destino)
+    public double DistanceInKilometersTo(GeoCoordinates other)
     {
-        ArgumentNullException.ThrowIfNull(destino);
+        ArgumentNullException.ThrowIfNull(other);
 
-        var diferencaLatitude = GrausParaRadianos(destino.Latitude - Latitude);
-        var diferencaLongitude = GrausParaRadianos(destino.Longitude - Longitude);
+        var dLat = DegreesToRadians(other.Latitude - Latitude);
+        var dLon = DegreesToRadians(other.Longitude - Longitude);
 
-        var latitudeOrigemRad = GrausParaRadianos(Latitude);
-        var latitudeDestinoRad = GrausParaRadianos(destino.Latitude);
+        var lat1 = DegreesToRadians(Latitude);
+        var lat2 = DegreesToRadians(other.Latitude);
 
-        var fatorA = Math.Pow(Math.Sin(diferencaLatitude / 2), 2) +
-                     (Math.Cos(latitudeOrigemRad) * Math.Cos(latitudeDestinoRad) * Math.Pow(Math.Sin(diferencaLongitude / 2), 2));
+        var a = Math.Pow(Math.Sin(dLat / 2), 2) +
+                (Math.Cos(lat1) * Math.Cos(lat2) * Math.Pow(Math.Sin(dLon / 2), 2));
 
-        var fatorC = 2 * Math.Asin(Math.Sqrt(fatorA));
-        return RaioTerraKm * fatorC;
+        var c = 2 * Math.Asin(Math.Sqrt(a));
+        return EarthRadiusKm * c;
     }
 
-    private static double GrausParaRadianos(double graus) => graus * (Math.PI / 180.0);
+    private static double DegreesToRadians(double degrees) => degrees * (Math.PI / 180.0);
 }

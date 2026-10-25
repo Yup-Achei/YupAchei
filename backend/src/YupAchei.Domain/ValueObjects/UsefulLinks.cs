@@ -2,31 +2,31 @@ namespace YupAchei.Domain.ValueObjects;
 
 public sealed record UsefulLinks
 {
-    public string? UrlGoogleMaps { get; }
-    public string? PerfilInstagram { get; }
-    public string? NumeroWhatsApp { get; }
-    public string? Telefone { get; }
+    public string? GoogleMapsUrl { get; }
+    public string? InstagramHandle { get; }
+    public string? WhatsAppNumber { get; }
+    public string? Phone { get; }
     public string? Email { get; }
-    public string? UrlSite { get; }
+    public string? WebsiteUrl { get; }
 
     public UsefulLinks(
-        string? urlGoogleMaps = null,
-        string? perfilInstagram = null,
-        string? numeroWhatsApp = null,
-        string? urlSite = null,
-        string? telefone = null,
+        string? googleMapsUrl = null,
+        string? instagramHandle = null,
+        string? whatsAppNumber = null,
+        string? websiteUrl = null,
+        string? phone = null,
         string? email = null)
     {
-        UrlGoogleMaps = Normalizar(urlGoogleMaps);
-        PerfilInstagram = Normalizar(perfilInstagram);
-        NumeroWhatsApp = Normalizar(numeroWhatsApp);
-        Telefone = Normalizar(telefone);
-        Email = Normalizar(email);
-        UrlSite = Normalizar(urlSite);
+        GoogleMapsUrl = Normalize(googleMapsUrl);
+        InstagramHandle = Normalize(instagramHandle);
+        WhatsAppNumber = Normalize(whatsAppNumber);
+        Phone = Normalize(phone);
+        Email = Normalize(email);
+        WebsiteUrl = Normalize(websiteUrl);
     }
 
-    public static UsefulLinks Vazio() => new();
+    public static UsefulLinks Empty() => new();
 
-    private static string? Normalizar(string? valor) =>
-        string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
+    private static string? Normalize(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

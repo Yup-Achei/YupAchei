@@ -14,22 +14,22 @@ public abstract class Entity : IEquatable<Entity>
         Id = id == Guid.Empty ? Guid.NewGuid() : id;
     }
 
-    public bool Equals(Entity? outro)
+    public bool Equals(Entity? other)
     {
-        if (outro is null)
+        if (other is null)
         {
             return false;
         }
 
-        if (ReferenceEquals(this, outro))
+        if (ReferenceEquals(this, other))
         {
             return true;
         }
 
-        return GetType() == outro.GetType() && Id == outro.Id;
+        return GetType() == other.GetType() && Id == other.Id;
     }
 
-    public override bool Equals(object? obj) => obj is Entity entidade && Equals(entidade);
+    public override bool Equals(object? obj) => obj is Entity entity && Equals(entity);
 
     public override int GetHashCode() => HashCode.Combine(GetType(), Id);
 }

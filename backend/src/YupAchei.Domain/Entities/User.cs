@@ -5,15 +5,15 @@ namespace YupAchei.Domain.Entities;
 
 public sealed class User : AggregateRoot
 {
-    private readonly HashSet<Guid> _lugaresSalvosIds = [];
+    private readonly HashSet<Guid> _savedPlaceIds = [];
 
-    public string Nome { get; private set; }
+    public string Name { get; private set; }
     public string Email { get; private set; }
-    public IReadOnlySet<Guid> LugaresSalvosIds => _lugaresSalvosIds;
+    public IReadOnlySet<Guid> SavedPlaceIds => _savedPlaceIds;
 
-    public User(string nome, string email, Guid? id = null) : base(id ?? Guid.NewGuid())
+    public User(string name, string email, Guid? id = null) : base(id ?? Guid.NewGuid())
     {
-        if (string.IsNullOrWhiteSpace(nome))
+        if (string.IsNullOrWhiteSpace(name))
         {
             throw new DomainException("O nome do usuário é obrigatório.");
         }
@@ -23,22 +23,22 @@ public sealed class User : AggregateRoot
             throw new DomainException("Um e-mail válido é obrigatório.");
         }
 
-        Nome = nome.Trim();
+        Name = name.Trim();
         Email = email.Trim().ToLowerInvariant();
     }
 
-    public void SalvarLugar(Guid lugarId)
+    public void SavePlace(Guid placeId)
     {
-        if (lugarId == Guid.Empty)
+        if (placeId == Guid.Empty)
         {
             throw new DomainException("O identificador do lugar salvo não pode ser vazio.");
         }
 
-        _lugaresSalvosIds.Add(lugarId);
+        _savedPlaceIds.Add(placeId);
     }
 
-    public void RemoverLugarSalvo(Guid lugarId)
+    public void RemoveSavedPlace(Guid placeId)
     {
-        _lugaresSalvosIds.Remove(lugarId);
+        _savedPlaceIds.Remove(placeId);
     }
 }

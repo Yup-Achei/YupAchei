@@ -10,19 +10,19 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        services.AddScoped<ICatalogoService, CatalogoService>();
-        services.AddScoped<IRecomendacaoService, RecomendacaoService>();
+        services.AddScoped<ICatalogService, CatalogService>();
+        services.AddScoped<IRecommendationService, RecommendationService>();
         return services;
     }
 
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
-        services.AddSingleton<ILugarRepository, InMemoryLugarRepository>();
-        services.AddSingleton<IEventoRepository, InMemoryEventoRepository>();
+        services.AddSingleton<IPlaceRepository, InMemoryPlaceRepository>();
+        services.AddSingleton<IEventRepository, InMemoryEventRepository>();
         services.AddSingleton<InMemoryUserRepository>();
         services.AddSingleton<IUserRepository>(sp => sp.GetRequiredService<InMemoryUserRepository>());
         services.AddSingleton<IUserReviewRepository>(sp => sp.GetRequiredService<InMemoryUserRepository>());
-        services.AddScoped<IRecomendacaoAgente, RecomendacaoAgenteLocalService>();
+        services.AddScoped<IRecommendationAgent, LocalRecommendationAgentService>();
         return services;
     }
 }
