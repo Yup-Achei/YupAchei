@@ -1,0 +1,95 @@
+name: CI Development
+
+on:
+  push:
+    branches:
+      - development
+  pull_request:
+    branches:
+      - development
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-development-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend Build and Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore backend/YupAchei.sln
+
+      - name: Build solution
+        run: dotnet build backend/YupAchei.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test backend/YupAchei.sln --configuration Release --no-build
+
+  frontend:
+    name: Frontend Build, Lint and Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test -- --passWithNoTests
+
+  ci-development:
+    name: CI Development
+    runs-on: ubuntu-latest
+    needs:
+      - backend
+      - frontend
+    if: always()
+
+    steps:
+      - name: Validate required jobs
+        env:
+          BACKEND_RESULT: ${{ needs.backend.result }}
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+        run: |
+          echo "Backend: ${BACKEND_RESULT}"
+          echo "Frontend: ${FRONTEND_RESULT}"
+
+          if [ "${BACKEND_RESULT}" != "success" ] || \
+             [ "${FRONTEND_RESULT}" != "success" ]; then
+            echo "CI Development FAILED."
+            exit 1
+          fi
+
+          echo "CI Development PASSED."
