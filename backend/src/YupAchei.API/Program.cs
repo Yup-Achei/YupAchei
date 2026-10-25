@@ -12,13 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 
-// RNF02: Cache HTTP em memória para garantir listagens públicas com tempo < 200ms
+// RNF02: In-memory HTTP Output Cache to keep public listings < 200ms
 builder.Services.AddOutputCache(options =>
 {
     options.AddBasePolicy(policy => policy.Expire(TimeSpan.FromSeconds(60)));
-    options.AddPolicy("CatalogoPublico", policy =>
+    options.AddPolicy("PublicCatalog", policy =>
         policy.Expire(TimeSpan.FromSeconds(120))
-              .SetVaryByQuery("termo", "categoria", "regiao", "bairro", "tags", "abertoAgora", "notaMinima", "apenasGratuitos", "tipo"));
+              .SetVaryByQuery("search", "category", "region", "neighborhood", "tags", "openNow", "minRating", "freeOnly", "type"));
 });
 
 builder.Services.AddCors(options =>
@@ -48,7 +48,7 @@ app.UseExceptionHandler(exceptionApp =>
         {
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             await Results.Problem(
-                title: "Regra de negócio violada",
+                title: "Business rule violation",
                 detail: domainEx.Message,
                 statusCode: StatusCodes.Status400BadRequest).ExecuteAsync(context);
             return;
@@ -56,7 +56,7 @@ app.UseExceptionHandler(exceptionApp =>
 
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         await Results.Problem(
-            title: "Erro interno no servidor",
+            title: "Internal server error",
             statusCode: StatusCodes.Status500InternalServerError).ExecuteAsync(context);
     });
 });
@@ -74,109 +74,109 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "YupA
 
 var api = app.MapGroup("/api");
 
-// RNF01: Endpoints de leitura 100% públicos (Zero Friction)
-api.MapGet("/categorias", (string? tipo, ICatalogoService catalogoService) =>
+// RNF01: 100% public read endpoints (Zero Friction)
+api.MapGet("/categories", (string? type, ICatalogService catalogService) =>
 {
-    var categorias = catalogoService.ListarCategorias(tipo);
-    return Results.Ok(categorias);
+    var categories = catalogService.ListCategories(type);
+    return Results.Ok(categories);
 })
-.CacheOutput("CatalogoPublico")
-.WithName("ListarCategorias");
+.CacheOutput("PublicCatalog")
+.WithName("GetCategories");
 
-api.MapGet("/tags", (ICatalogoService catalogoService) =>
+api.MapGet("/tags", (ICatalogService catalogService) =>
 {
-    var tags = catalogoService.ListarTags();
+    var tags = catalogService.ListTags();
     return Results.Ok(tags);
 })
-.CacheOutput("CatalogoPublico")
-.WithName("ListarTags");
+.CacheOutput("PublicCatalog")
+.WithName("GetTags");
 
-api.MapGet("/locais", async (
-    string? termo,
-    string? categoria,
-    UrbanRegion? regiao,
-    string? bairro,
+api.MapGet("/places", async (
+    string? search,
+    string? category,
+    UrbanRegion? region,
+    string? neighborhood,
     string? tags,
-    bool? abertoAgora,
-    double? notaMinima,
-    ICatalogoService catalogoService,
+    bool? openNow,
+    double? minRating,
+    ICatalogService catalogService,
     CancellationToken cancellationToken) =>
 {
-    var listaTags = string.IsNullOrWhiteSpace(tags)
+    var tagList = string.IsNullOrWhiteSpace(tags)
         ? null
         : tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
 
-    var criterios = new PlaceSearchCriteria(
-        TermoBusca: termo,
-        Categoria: CatalogoService.TentarConverterCategoria(categoria),
-        Regiao: regiao,
-        Bairro: bairro,
-        EtiquetasClima: listaTags,
-        ApenasAbertoAgora: abertoAgora ?? false,
-        NotaMinima: notaMinima);
+    var criteria = new PlaceSearchCriteria(
+        SearchTerm: search,
+        Category: CatalogService.TryParseCategory(category),
+        Region: region,
+        Neighborhood: neighborhood,
+        VibeTags: tagList,
+        OnlyOpenNow: openNow ?? false,
+        MinRating: minRating);
 
-    var locais = await catalogoService.ListarLugaresAsync(criterios, cancellationToken);
-    return Results.Ok(locais);
+    var places = await catalogService.ListPlacesAsync(criteria, cancellationToken);
+    return Results.Ok(places);
 })
-.CacheOutput("CatalogoPublico")
-.WithName("ListarLocais");
+.CacheOutput("PublicCatalog")
+.WithName("GetPlaces");
 
-api.MapGet("/locais/{idOuSlug}", async (
-    string idOuSlug,
-    ICatalogoService catalogoService,
+api.MapGet("/places/{idOrSlug}", async (
+    string idOrSlug,
+    ICatalogService catalogService,
     CancellationToken cancellationToken) =>
 {
-    var local = await catalogoService.ObterLugarPorIdOuSlugAsync(idOuSlug, cancellationToken: cancellationToken);
-    return local is null ? Results.NotFound() : Results.Ok(local);
+    var place = await catalogService.GetPlaceByIdOrSlugAsync(idOrSlug, cancellationToken: cancellationToken);
+    return place is null ? Results.NotFound() : Results.Ok(place);
 })
-.CacheOutput("CatalogoPublico")
-.WithName("ObterLocalPorIdOuSlug");
+.CacheOutput("PublicCatalog")
+.WithName("GetPlaceByIdOrSlug");
 
-api.MapGet("/eventos", async (
-    string? termo,
-    UrbanRegion? regiao,
+api.MapGet("/events", async (
+    string? search,
+    UrbanRegion? region,
     string? tags,
-    bool? apenasGratuitos,
-    ICatalogoService catalogoService,
+    bool? freeOnly,
+    ICatalogService catalogService,
     CancellationToken cancellationToken) =>
 {
-    var listaTags = string.IsNullOrWhiteSpace(tags)
+    var tagList = string.IsNullOrWhiteSpace(tags)
         ? null
         : tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
 
-    var criterios = new EventSearchCriteria(
-        TermoBusca: termo,
-        Regiao: regiao,
-        EtiquetasClima: listaTags,
-        ApenasGratuitos: apenasGratuitos ?? false);
+    var criteria = new EventSearchCriteria(
+        SearchTerm: search,
+        Region: region,
+        VibeTags: tagList,
+        OnlyFree: freeOnly ?? false);
 
-    var eventos = await catalogoService.ListarEventosAtivosAsync(criterios, cancellationToken);
-    return Results.Ok(eventos);
+    var events = await catalogService.ListActiveEventsAsync(criteria, cancellationToken);
+    return Results.Ok(events);
 })
-.CacheOutput("CatalogoPublico")
-.WithName("ListarEventos");
+.CacheOutput("PublicCatalog")
+.WithName("GetEvents");
 
-api.MapGet("/eventos/{idOuSlug}", async (
-    string idOuSlug,
-    ICatalogoService catalogoService,
+api.MapGet("/events/{idOrSlug}", async (
+    string idOrSlug,
+    ICatalogService catalogService,
     CancellationToken cancellationToken) =>
 {
-    var evento = await catalogoService.ObterEventoPorIdOuSlugAsync(idOuSlug, cancellationToken);
-    return evento is null ? Results.NotFound() : Results.Ok(evento);
+    var @event = await catalogService.GetEventByIdOrSlugAsync(idOrSlug, cancellationToken);
+    return @event is null ? Results.NotFound() : Results.Ok(@event);
 })
-.CacheOutput("CatalogoPublico")
-.WithName("ObterEventoPorIdOuSlug");
+.CacheOutput("PublicCatalog")
+.WithName("GetEventByIdOrSlug");
 
-// RF05 + RNF03: Recomendações inteligentes do Yupy AI com Fallback resiliente
-api.MapPost("/recomendacoes", async (
-    RecomendacaoRequestDto request,
-    IRecomendacaoService recomendacaoService,
+// RF05 + RNF03: Yupy AI smart recommendations with resilient fallback
+api.MapPost("/recommendations", async (
+    RecommendationRequestDto request,
+    IRecommendationService recommendationService,
     CancellationToken cancellationToken) =>
 {
-    var resposta = await recomendacaoService.ObterRecomendacoesAsync(request, cancellationToken: cancellationToken);
-    return Results.Ok(resposta);
+    var response = await recommendationService.GetRecommendationsAsync(request, cancellationToken: cancellationToken);
+    return Results.Ok(response);
 })
-.WithName("ObterRecomendacoesYupy");
+.WithName("GetYupyRecommendations");
 
 app.Run();
 

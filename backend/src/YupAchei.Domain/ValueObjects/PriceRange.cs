@@ -4,42 +4,42 @@ namespace YupAchei.Domain.ValueObjects;
 
 public sealed record PriceRange
 {
-    public decimal ValorMinimo { get; }
-    public decimal ValorMaximo { get; }
-    public string Moeda { get; }
-    public bool Gratuito => ValorMinimo == 0m && ValorMaximo == 0m;
+    public decimal MinAmount { get; }
+    public decimal MaxAmount { get; }
+    public string Currency { get; }
+    public bool IsFree => MinAmount == 0m && MaxAmount == 0m;
 
-    public PriceRange(decimal valorMinimo, decimal valorMaximo, string moeda = "BRL")
+    public PriceRange(decimal minAmount, decimal maxAmount, string currency = "BRL")
     {
-        if (valorMinimo < 0m)
+        if (minAmount < 0m)
         {
             throw new DomainException("O valor mínimo da faixa de preço não pode ser negativo.");
         }
 
-        if (valorMaximo < valorMinimo)
+        if (maxAmount < minAmount)
         {
             throw new DomainException("O valor máximo da faixa de preço não pode ser menor que o valor mínimo.");
         }
 
-        if (string.IsNullOrWhiteSpace(moeda))
+        if (string.IsNullOrWhiteSpace(currency))
         {
             throw new DomainException("A moeda da faixa de preço é obrigatória.");
         }
 
-        ValorMinimo = valorMinimo;
-        ValorMaximo = valorMaximo;
-        Moeda = moeda.Trim().ToUpperInvariant();
+        MinAmount = minAmount;
+        MaxAmount = maxAmount;
+        Currency = currency.Trim().ToUpperInvariant();
     }
 
-    public static PriceRange Gratis(string moeda = "BRL") => new(0m, 0m, moeda);
+    public static PriceRange Free(string currency = "BRL") => new(0m, 0m, currency);
 
-    public static PriceRange APartirDe(decimal valorMinimo, string moeda = "BRL")
+    public static PriceRange StartingFrom(decimal minAmount, string currency = "BRL")
     {
-        if (valorMinimo <= 0m)
+        if (minAmount <= 0m)
         {
-            throw new DomainException("Para eventos pagos 'a partir de', o valor mínimo deve ser maior que zero.");
+            throw new DomainException("Para valores 'a partir de', o valor mínimo deve ser maior que zero.");
         }
 
-        return new PriceRange(valorMinimo, valorMinimo, moeda);
+        return new PriceRange(minAmount, minAmount, currency);
     }
 }

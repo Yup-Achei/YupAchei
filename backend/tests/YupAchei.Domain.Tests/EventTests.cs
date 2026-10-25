@@ -7,99 +7,99 @@ namespace YupAchei.Domain.Tests;
 
 public class EventTests
 {
-    private static readonly DateTimeOffset DataInicioPadrao = new(2026, 11, 21, 20, 0, 0, TimeSpan.FromHours(-4));
-    private static readonly DateTimeOffset DataFimPadrao = new(2026, 11, 22, 1, 0, 0, TimeSpan.FromHours(-4));
+    private static readonly DateTimeOffset DefaultStartDate = new(2026, 11, 21, 20, 0, 0, TimeSpan.FromHours(-4));
+    private static readonly DateTimeOffset DefaultEndDate = new(2026, 11, 22, 1, 0, 0, TimeSpan.FromHours(-4));
 
     [Fact]
-    public void Evento_ParaLugarCadastrado_DeveNascerEmRevisao_EUsarSloganEOrganizadorSemDocumento()
+    public void Event_ForRegisteredPlace_ShouldStartUnderReview_AndUseSlugAndDocumentFreeOrganizer()
     {
-        var lugarId = Guid.NewGuid();
-        var organizador = new OrganizadorEvento("Produtora Cultural PVH", "@produtorapvh", verificado: true);
+        var placeId = Guid.NewGuid();
+        var organizer = new EventOrganizer("Produtora Cultural PVH", "@produtorapvh", isVerified: true);
 
-        var evento = Evento.CriarParaLugar(
-            titulo: "Feira Gastronômica Beira-Rio",
-            descricao: "Food trucks, comida regional e música ao vivo no Complexo da EFMM.",
-            dataInicio: DataInicioPadrao,
-            dataFim: DataFimPadrao,
-            lugarId: lugarId,
-            faixaPreco: PriceRange.Gratis(),
+        var @event = Event.CreateForPlace(
+            title: "Feira Gastronômica Beira-Rio",
+            description: "Food trucks, comida regional e música ao vivo no Complexo da EFMM.",
+            startDate: DefaultStartDate,
+            endDate: DefaultEndDate,
+            placeId: placeId,
+            priceRange: PriceRange.Free(),
             ticketUrl: null,
-            etiquetasClima: ["gratuito", "familia", "por-do-sol", "musica-ao-vivo"],
-            slogan: "feira-gastronomica-efmm",
-            categoria: CategoriaLugar.Gastronomia,
-            organizador: organizador,
-            destaque: true,
-            patrocinado: true);
+            vibeTags: ["gratuito", "familia", "por-do-sol", "musica-ao-vivo"],
+            slug: "feira-gastronomica-efmm",
+            category: PlaceCategory.Gastronomy,
+            organizer: organizer,
+            isFeatured: true,
+            isSponsored: true);
 
-        Assert.True(evento.PossuiVinculoLugar);
-        Assert.False(evento.PossuiLocalLivre);
-        Assert.Equal("Feira Gastronômica Beira-Rio", evento.Titulo);
-        Assert.Equal("feira-gastronomica-efmm", evento.Slogan);
-        Assert.Equal(CategoriaLugar.Gastronomia, evento.Categoria);
-        Assert.Equal(lugarId, evento.LugarId);
-        Assert.Null(evento.LocalLivre);
-        Assert.Equal(StatusPublicacao.EmRevisao, evento.Status);
-        Assert.False(evento.EstaDisponivelNaAgendaEm(DataInicioPadrao.AddDays(-5)));
+        Assert.True(@event.HasPlaceLink);
+        Assert.False(@event.HasFreeLocation);
+        Assert.Equal("Feira Gastronômica Beira-Rio", @event.Title);
+        Assert.Equal("feira-gastronomica-efmm", @event.Slug);
+        Assert.Equal(PlaceCategory.Gastronomy, @event.Category);
+        Assert.Equal(placeId, @event.PlaceId);
+        Assert.Null(@event.FreeLocation);
+        Assert.Equal(PublicationStatus.UnderReview, @event.Status);
+        Assert.False(@event.IsAvailableInScheduleAt(DefaultStartDate.AddDays(-5)));
 
-        evento.Aprovar();
-        Assert.Equal(StatusPublicacao.Aprovado, evento.Status);
-        Assert.True(evento.EstaAtivoEm(DataInicioPadrao.AddHours(1)));
-        Assert.True(evento.EstaDisponivelNaAgendaEm(DataInicioPadrao.AddDays(-5)));
-        Assert.False(evento.EstaDisponivelNaAgendaEm(DataFimPadrao.AddMinutes(1)));
+        @event.Approve();
+        Assert.Equal(PublicationStatus.Approved, @event.Status);
+        Assert.True(@event.IsActiveAt(DefaultStartDate.AddHours(1)));
+        Assert.True(@event.IsAvailableInScheduleAt(DefaultStartDate.AddDays(-5)));
+        Assert.False(@event.IsAvailableInScheduleAt(DefaultEndDate.AddMinutes(1)));
     }
 
     [Fact]
-    public void Evento_ParaLocalLivre_DeveSuportarLocalSemEnderecoOuBairroFormal()
+    public void Event_ForFreeLocation_ShouldSupportLocationWithoutFormalAddressOrNeighborhood()
     {
-        var localLivre = new LocalLivre(
-            nome: "Mirantes I, II e III",
-            endereco: null,
-            bairro: null,
-            coordenadas: new GeoCoordinates(-8.7590, -63.9110));
+        var freeLocation = new FreeLocation(
+            name: "Mirantes I, II e III",
+            addressText: null,
+            neighborhood: null,
+            coordinates: new GeoCoordinates(-8.7590, -63.9110));
 
-        var evento = Evento.CriarParaLocalLivre(
-            titulo: "Forró nos Mirantes",
-            descricao: "Forró com vista para o Rio Madeira.",
-            dataInicio: DataInicioPadrao,
-            dataFim: DataFimPadrao,
-            localLivre: localLivre,
-            faixaPreco: PriceRange.APartirDe(20m),
-            etiquetasClima: ["musica-ao-vivo", "vista-rio"],
-            slogan: "forro-nos-mirantes",
-            categoria: CategoriaLugar.Festas);
+        var @event = Event.CreateForFreeLocation(
+            title: "Forró nos Mirantes",
+            description: "Forró com vista para o Rio Madeira.",
+            startDate: DefaultStartDate,
+            endDate: DefaultEndDate,
+            freeLocation: freeLocation,
+            priceRange: PriceRange.StartingFrom(20m),
+            vibeTags: ["musica-ao-vivo", "vista-rio"],
+            slug: "forro-nos-mirantes",
+            category: PlaceCategory.Parties);
 
-        Assert.False(evento.PossuiVinculoLugar);
-        Assert.True(evento.PossuiLocalLivre);
-        Assert.Null(evento.LugarId);
-        Assert.Equal("forro-nos-mirantes", evento.Slogan);
-        Assert.Equal("Mirantes I, II e III", evento.NomeLocal);
-        Assert.Equal(localLivre, evento.LocalLivre);
+        Assert.False(@event.HasPlaceLink);
+        Assert.True(@event.HasFreeLocation);
+        Assert.Null(@event.PlaceId);
+        Assert.Equal("forro-nos-mirantes", @event.Slug);
+        Assert.Equal("Mirantes I, II e III", @event.VenueName);
+        Assert.Equal(freeLocation, @event.FreeLocation);
     }
 
     [Fact]
-    public void Evento_DeveRejeitarCategoriaExclusivaDeLugar()
-    {
-        Assert.Throws<DomainException>(() =>
-            Evento.CriarParaLugar(
-                titulo: "Evento com Categoria Inválida",
-                descricao: "Descrição",
-                dataInicio: DataInicioPadrao,
-                dataFim: DataFimPadrao,
-                lugarId: Guid.NewGuid(),
-                faixaPreco: PriceRange.Gratis(),
-                categoria: CategoriaLugar.Cafeterias));
-    }
-
-    [Fact]
-    public void Evento_DeveLancarDomainException_QuandoDataFimNaoForPosteriorADataInicio()
+    public void Event_ShouldRejectPlaceExclusiveCategory()
     {
         Assert.Throws<DomainException>(() =>
-            Evento.CriarParaLugar(
-                "Show Inválido",
-                "Descrição",
-                DataInicioPadrao,
-                DataInicioPadrao.AddHours(-1),
+            Event.CreateForPlace(
+                title: "Event with Invalid Category",
+                description: "Description",
+                startDate: DefaultStartDate,
+                endDate: DefaultEndDate,
+                placeId: Guid.NewGuid(),
+                priceRange: PriceRange.Free(),
+                category: PlaceCategory.Cafes));
+    }
+
+    [Fact]
+    public void Event_ShouldThrowDomainException_WhenEndDateIsNotAfterStartDate()
+    {
+        Assert.Throws<DomainException>(() =>
+            Event.CreateForPlace(
+                "Invalid Show",
+                "Description",
+                DefaultStartDate,
+                DefaultStartDate.AddHours(-1),
                 Guid.NewGuid(),
-                PriceRange.Gratis()));
+                PriceRange.Free()));
     }
 }

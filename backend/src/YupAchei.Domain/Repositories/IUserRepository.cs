@@ -4,15 +4,15 @@ namespace YupAchei.Domain.Repositories;
 
 public interface IUserRepository
 {
-    Task<User?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<User?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default);
-    Task AdicionarAsync(User usuario, CancellationToken cancellationToken = default);
-    Task AtualizarAsync(User usuario, CancellationToken cancellationToken = default);
+    Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task AddAsync(User user, CancellationToken cancellationToken = default);
+    Task UpdateAsync(User user, CancellationToken cancellationToken = default);
 }
 
 public interface IUserReviewRepository
 {
-    Task<IReadOnlyList<AvaliacaoUser>> ObterPorLugarIdAsync(Guid lugarId, CancellationToken cancellationToken = default);
-    Task<AvaliacaoUser?> ObterPorLugarEUsuarioAsync(Guid lugarId, Guid usuarioId, CancellationToken cancellationToken = default);
-    Task AdicionarAsync(AvaliacaoUser avaliacao, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<UserReview>> GetByPlaceIdAsync(Guid placeId, CancellationToken cancellationToken = default);
+    Task<UserReview?> GetByPlaceAndUserAsync(Guid placeId, Guid userId, CancellationToken cancellationToken = default);
+    Task AddAsync(UserReview review, CancellationToken cancellationToken = default);
 }

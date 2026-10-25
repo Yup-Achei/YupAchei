@@ -7,159 +7,159 @@ namespace YupAchei.Domain.Tests;
 
 public class PlaceAndReviewsTests
 {
-    private static Lugar CriarLugarExemplo(WeeklySchedule? agenda = null, bool aberto24h = false)
+    private static Place CreateSamplePlace(WeeklySchedule? schedule = null, bool isOpen24Hours = false)
     {
-        return new Lugar(
-            nome: "Café Madeira",
-            slogan: "cafe-madeira",
-            descricao: "Cafeteria artesanal no coração de Porto Velho.",
-            categoria: CategoriaLugar.Cafeterias,
-            endereco: new Address("Av. Carlos Gomes", "1234", "Centro", UrbanRegion.Centro, "Porto Velho", "RO", "76801-000"),
-            coordenadas: new GeoCoordinates(-8.7619, -63.9039),
-            horarioFuncionamento: agenda ?? WeeklySchedule.Vazia(),
+        return new Place(
+            name: "Café Madeira",
+            slug: "cafe-madeira",
+            description: "Cafeteria artesanal no coração de Porto Velho.",
+            category: PlaceCategory.Cafes,
+            address: new Address("Av. Carlos Gomes", "1234", "Centro", UrbanRegion.Center, "Porto Velho", "RO", "76801-000"),
+            coordinates: new GeoCoordinates(-8.7619, -63.9039),
+            openingHours: schedule ?? WeeklySchedule.Empty(),
             links: new UsefulLinks("https://maps.google.com/?q=cafe", "@cafemadeira", "5569999999999"),
-            etiquetasClima: ["familia", "climatizado", "wifi"],
-            fotos: [new MediaAsset("https://cdn.yupachei.com/cafe-madeira.webp", "Fachada", ehCapa: true)],
-            tipo: TipoLugar.Comercial,
-            faixaPreco: new PriceRange(18m, 55m),
-            aberto24h: aberto24h
+            vibeTags: ["familia", "climatizado", "wifi"],
+            photos: [new MediaAsset("https://cdn.yupachei.com/cafe-madeira.webp", "Fachada", isCover: true)],
+            kind: PlaceKind.Commercial,
+            priceRange: new PriceRange(18m, 55m),
+            isOpen24Hours: isOpen24Hours
         );
     }
 
     [Fact]
-    public void Lugar_DeveNascerEmRevisao_EUsarPriceRangeUnificado()
+    public void Place_ShouldStartUnderReview_AndUseUnifiedPriceRangeAndSlug()
     {
-        var lugar = CriarLugarExemplo();
+        var place = CreateSamplePlace();
 
-        Assert.Equal("Café Madeira", lugar.Nome);
-        Assert.Equal("cafe-madeira", lugar.Slogan);
-        Assert.Equal(CategoriaLugar.Cafeterias, lugar.Categoria);
-        Assert.Equal(TipoLugar.Comercial, lugar.Tipo);
-        Assert.Equal(18m, lugar.FaixaPreco.ValorMinimo);
-        Assert.Equal(55m, lugar.FaixaPreco.ValorMaximo);
-        Assert.True(lugar.Ativo);
-        Assert.Equal(StatusPublicacao.EmRevisao, lugar.Status);
-        Assert.False(lugar.EstaAprovado);
+        Assert.Equal("Café Madeira", place.Name);
+        Assert.Equal("cafe-madeira", place.Slug);
+        Assert.Equal(PlaceCategory.Cafes, place.Category);
+        Assert.Equal(PlaceKind.Commercial, place.Kind);
+        Assert.Equal(18m, place.PriceRange.MinAmount);
+        Assert.Equal(55m, place.PriceRange.MaxAmount);
+        Assert.True(place.IsActive);
+        Assert.Equal(PublicationStatus.UnderReview, place.Status);
+        Assert.False(place.IsApproved);
 
-        lugar.Aprovar();
-        Assert.Equal(StatusPublicacao.Aprovado, lugar.Status);
-        Assert.True(lugar.EstaAprovado);
+        place.Approve();
+        Assert.Equal(PublicationStatus.Approved, place.Status);
+        Assert.True(place.IsApproved);
     }
 
     [Fact]
-    public void Lugar_TransicoesDeStatus_DeveImpedirAprovarDiretoDeRejeitado()
+    public void Place_StatusTransitions_ShouldPreventApprovingDirectlyFromRejected()
     {
-        var lugar = CriarLugarExemplo();
+        var place = CreateSamplePlace();
 
-        lugar.Rejeitar();
-        Assert.Equal(StatusPublicacao.Rejeitado, lugar.Status);
+        place.Reject();
+        Assert.Equal(PublicationStatus.Rejected, place.Status);
 
-        Assert.Throws<DomainException>(() => lugar.Aprovar());
+        Assert.Throws<DomainException>(() => place.Approve());
 
-        lugar.ColocarEmRevisao();
-        lugar.Aprovar();
-        Assert.Equal(StatusPublicacao.Aprovado, lugar.Status);
+        place.SendToReview();
+        place.Approve();
+        Assert.Equal(PublicationStatus.Approved, place.Status);
     }
 
     [Fact]
-    public void Lugar_Aberto24h_DeveEstarAbertoApenasQuandoAprovado()
+    public void Place_Open24Hours_ShouldBeOpenOnlyWhenApproved()
     {
-        var praca = CriarLugarExemplo(agenda: WeeklySchedule.Vazia(), aberto24h: true);
-        var madrugada = new DateTimeOffset(2026, 10, 24, 3, 30, 0, TimeSpan.FromHours(-4));
+        var square = CreateSamplePlace(schedule: WeeklySchedule.Empty(), isOpen24Hours: true);
+        var earlyMorning = new DateTimeOffset(2026, 10, 24, 3, 30, 0, TimeSpan.FromHours(-4));
 
-        // Nasce em revisão -> ainda não aparece como aberto ao público
-        Assert.False(praca.EstaAbertoEm(madrugada));
+        // Starts under review -> not yet visible/open to the public
+        Assert.False(square.IsOpenAt(earlyMorning));
 
-        praca.Aprovar();
-        Assert.True(praca.EstaAbertoEm(madrugada));
+        square.Approve();
+        Assert.True(square.IsOpenAt(earlyMorning));
 
-        praca.ColocarEmRevisao();
-        Assert.False(praca.EstaAbertoEm(madrugada));
+        square.SendToReview();
+        Assert.False(square.IsOpenAt(earlyMorning));
     }
 
     [Fact]
-    public void Lugar_DeveRejeitarCategoriaExclusivaDeEvento()
+    public void Place_ShouldRejectEventExclusiveCategory()
     {
-        Assert.Throws<DomainException>(() => new Lugar(
-            nome: "Local Inválido",
-            slogan: "local-invalido",
-            descricao: "Descrição",
-            categoria: CategoriaLugar.Festas,
-            endereco: new Address("Rua A", "10", "Centro", UrbanRegion.Centro, "Porto Velho", "RO"),
-            coordenadas: new GeoCoordinates(-8.76, -63.90)));
+        Assert.Throws<DomainException>(() => new Place(
+            name: "Invalid Place",
+            slug: "invalid-place",
+            description: "Description",
+            category: PlaceCategory.Parties,
+            address: new Address("Rua A", "10", "Centro", UrbanRegion.Center, "Porto Velho", "RO"),
+            coordinates: new GeoCoordinates(-8.76, -63.90)));
     }
 
     [Fact]
-    public void Lugar_AdicionarAvaliacaoParceiro_DeveVincularEntidadeParceiroSemDuplicarDados()
+    public void Place_AddPartnerReview_ShouldReferencePartnerEntityWithoutDuplicatingData()
     {
-        var lugar = CriarLugarExemplo();
-        var parceiro = new Parceiro(
-            nome: "Rondônia Gourmet",
-            urlAvatar: "https://cdn.yupachei.com/avatars/rg.webp",
-            redeSocial: SocialNetwork.Instagram,
-            urlPerfilSocial: "https://instagram.com/rondoniagourmet");
+        var place = CreateSamplePlace();
+        var partner = new Partner(
+            name: "Rondônia Gourmet",
+            avatarUrl: "https://cdn.yupachei.com/avatars/rg.webp",
+            socialNetwork: SocialNetwork.Instagram,
+            socialProfileUrl: "https://instagram.com/rondoniagourmet");
 
-        var avaliacaoParceiro = AvaliacaoParceiro.CriarComParceiro(
-            lugarId: lugar.Id,
-            parceiro: parceiro,
-            seloOuNota: "Top Escolha 4.9",
-            comentarioCurto: "Melhor espresso e pão de queijo da região central!",
-            emDestaque: true);
+        var partnerReview = PartnerReview.CreateWithPartner(
+            placeId: place.Id,
+            partner: partner,
+            badgeOrScore: "Top Pick 4.9",
+            shortComment: "Melhor espresso e pão de queijo da região central!",
+            isFeatured: true);
 
-        lugar.AdicionarAvaliacaoParceiro(avaliacaoParceiro);
+        place.AddPartnerReview(partnerReview);
 
-        Assert.Single(lugar.AvaliacoesParceiros);
-        Assert.Equal(parceiro.Id, lugar.AvaliacoesParceiros[0].ParceiroId);
-        Assert.Equal("Rondônia Gourmet", lugar.AvaliacoesParceiros[0].Parceiro?.Nome);
+        Assert.Single(place.PartnerReviews);
+        Assert.Equal(partner.Id, place.PartnerReviews[0].PartnerId);
+        Assert.Equal("Rondônia Gourmet", place.PartnerReviews[0].Partner?.Name);
 
-        var comentarioLongo = new string('a', 201);
-        Assert.Throws<DomainException>(() => AvaliacaoParceiro.CriarComParceiro(
-            lugar.Id,
-            parceiro,
+        var longComment = new string('a', 201);
+        Assert.Throws<DomainException>(() => PartnerReview.CreateWithPartner(
+            place.Id,
+            partner,
             "5.0",
-            comentarioLongo));
+            longComment));
     }
 
     [Fact]
-    public void AvaliacaoUser_E_CalculoNotaMediaLugar_DeveSuportarAvaliacoesDeUsuariosLogados()
+    public void UserReview_And_PlaceAverageRating_ShouldSupportAuthenticatedUserReviews()
     {
-        var lugar = CriarLugarExemplo();
-        var usuario1 = new User("Ana Silva", "ana@email.com");
-        var usuario2 = new User("Carlos Souza", "carlos@email.com");
+        var place = CreateSamplePlace();
+        var user1 = new User("Ana Silva", "ana@email.com");
+        var user2 = new User("Carlos Souza", "carlos@email.com");
 
-        var avaliacao1 = new AvaliacaoUser(lugar.Id, usuario1.Id, 5, "Excelente atendimento!");
-        var avaliacao2 = new AvaliacaoUser(lugar.Id, usuario2.Id, 4, "Muito bom.");
+        var review1 = new UserReview(place.Id, user1.Id, 5, "Excelente atendimento!");
+        var review2 = new UserReview(place.Id, user2.Id, 4, "Muito bom.");
 
-        lugar.AplicarAvaliacaoUsuario(avaliacao1.Nota);
-        lugar.AplicarAvaliacaoUsuario(avaliacao2.Nota);
+        place.ApplyUserReview(review1.Rating);
+        place.ApplyUserReview(review2.Rating);
 
-        Assert.Equal(2, lugar.QuantidadeAvaliacoes);
-        Assert.Equal(4.5, lugar.NotaMedia);
+        Assert.Equal(2, place.ReviewCount);
+        Assert.Equal(4.5, place.AverageRating);
     }
 
     [Theory]
     [InlineData(0)]
     [InlineData(6)]
     [InlineData(-1)]
-    public void AvaliacaoUser_DeveLancarDomainException_QuandoNotaForaDoIntervalo1A5(int notaInvalida)
+    public void UserReview_ShouldThrowDomainException_WhenRatingIsOutside1To5Range(int invalidRating)
     {
         Assert.Throws<DomainException>(() =>
-            new AvaliacaoUser(Guid.NewGuid(), Guid.NewGuid(), notaInvalida, "Comentário"));
+            new UserReview(Guid.NewGuid(), Guid.NewGuid(), invalidRating, "Comment"));
     }
 
     [Fact]
-    public void User_DeveGerenciarLugaresSalvos()
+    public void User_ShouldManageSavedPlaces()
     {
-        var usuario = new User("Rodrigo", "rodrigo@yupachei.com");
-        var lugarId = Guid.NewGuid();
+        var user = new User("Rodrigo", "rodrigo@yupachei.com");
+        var placeId = Guid.NewGuid();
 
-        usuario.SalvarLugar(lugarId);
-        usuario.SalvarLugar(lugarId);
+        user.SavePlace(placeId);
+        user.SavePlace(placeId);
 
-        Assert.Single(usuario.LugaresSalvosIds);
-        Assert.Contains(lugarId, usuario.LugaresSalvosIds);
+        Assert.Single(user.SavedPlaceIds);
+        Assert.Contains(placeId, user.SavedPlaceIds);
 
-        usuario.RemoverLugarSalvo(lugarId);
-        Assert.Empty(usuario.LugaresSalvosIds);
+        user.RemoveSavedPlace(placeId);
+        Assert.Empty(user.SavedPlaceIds);
     }
 }

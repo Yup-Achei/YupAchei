@@ -4,68 +4,65 @@ namespace YupAchei.Domain.ValueObjects;
 
 public sealed record DailyHours
 {
-    public DayOfWeek DiaSemana { get; }
-    public TimeOnly HorarioAbertura { get; }
-    public TimeOnly HorarioFechamento { get; }
+    public DayOfWeek DayOfWeek { get; }
+    public TimeOnly OpenTime { get; }
+    public TimeOnly CloseTime { get; }
 
-    /// <summary>
-    /// Indica se o fechamento ocorre após a meia-noite (no dia seguinte).
-    /// </summary>
-    public bool FechaNoDiaSeguinte => HorarioFechamento <= HorarioAbertura;
+    public bool ClosesNextDay => CloseTime <= OpenTime;
 
-    public DailyHours(DayOfWeek diaSemana, TimeOnly horarioAbertura, TimeOnly horarioFechamento)
+    public DailyHours(DayOfWeek dayOfWeek, TimeOnly openTime, TimeOnly closeTime)
     {
-        if (horarioAbertura == horarioFechamento)
+        if (openTime == closeTime)
         {
             throw new DomainException("O horário de abertura e fechamento não podem ser idênticos.");
         }
 
-        DiaSemana = diaSemana;
-        HorarioAbertura = horarioAbertura;
-        HorarioFechamento = horarioFechamento;
+        DayOfWeek = dayOfWeek;
+        OpenTime = openTime;
+        CloseTime = closeTime;
     }
 }
 
 public sealed record WeeklySchedule
 {
-    private readonly IReadOnlyList<DailyHours> _horarios;
+    private readonly IReadOnlyList<DailyHours> _entries;
 
-    public IReadOnlyList<DailyHours> Horarios => _horarios;
+    public IReadOnlyList<DailyHours> Entries => _entries;
 
-    public WeeklySchedule(IEnumerable<DailyHours> horarios)
+    public WeeklySchedule(IEnumerable<DailyHours> entries)
     {
-        ArgumentNullException.ThrowIfNull(horarios);
-        _horarios = horarios.ToList().AsReadOnly();
+        ArgumentNullException.ThrowIfNull(entries);
+        _entries = entries.ToList().AsReadOnly();
     }
 
-    public static WeeklySchedule Vazia() => new([]);
+    public static WeeklySchedule Empty() => new([]);
 
-    public bool EstaAbertoEm(DateTimeOffset dataHora)
+    public bool IsOpenAt(DateTimeOffset timestamp)
     {
-        if (_horarios.Count == 0)
+        if (_entries.Count == 0)
         {
             return false;
         }
 
-        var diaAtual = dataHora.DayOfWeek;
-        var diaAnterior = diaAtual == DayOfWeek.Sunday ? DayOfWeek.Saturday : diaAtual - 1;
-        var horaAtual = TimeOnly.FromTimeSpan(dataHora.TimeOfDay);
+        var currentDay = timestamp.DayOfWeek;
+        var previousDay = currentDay == DayOfWeek.Sunday ? DayOfWeek.Saturday : currentDay - 1;
+        var currentTime = TimeOnly.FromTimeSpan(timestamp.TimeOfDay);
 
-        foreach (var horario in _horarios)
+        foreach (var entry in _entries)
         {
-            if (horario.DiaSemana == diaAtual)
+            if (entry.DayOfWeek == currentDay)
             {
-                if (!horario.FechaNoDiaSeguinte && horaAtual >= horario.HorarioAbertura && horaAtual < horario.HorarioFechamento)
+                if (!entry.ClosesNextDay && currentTime >= entry.OpenTime && currentTime < entry.CloseTime)
                 {
                     return true;
                 }
 
-                if (horario.FechaNoDiaSeguinte && horaAtual >= horario.HorarioAbertura)
+                if (entry.ClosesNextDay && currentTime >= entry.OpenTime)
                 {
                     return true;
                 }
             }
-            else if (horario.DiaSemana == diaAnterior && horario.FechaNoDiaSeguinte && horaAtual < horario.HorarioFechamento)
+            else if (entry.DayOfWeek == previousDay && entry.ClosesNextDay && currentTime < entry.CloseTime)
             {
                 return true;
             }

@@ -5,10 +5,10 @@ namespace YupAchei.Domain.ValueObjects;
 public sealed record MediaAsset
 {
     public string Url { get; }
-    public string? TextoAlternativo { get; }
-    public bool EhCapa { get; }
+    public string? AltText { get; }
+    public bool IsCover { get; }
 
-    public MediaAsset(string url, string? textoAlternativo = null, bool ehCapa = false)
+    public MediaAsset(string url, string? altText = null, bool isCover = false)
     {
         if (string.IsNullOrWhiteSpace(url))
         {
@@ -16,7 +16,7 @@ public sealed record MediaAsset
         }
 
         Url = url.Trim();
-        TextoAlternativo = string.IsNullOrWhiteSpace(textoAlternativo) ? null : textoAlternativo.Trim();
-        EhCapa = ehCapa;
+        AltText = string.IsNullOrWhiteSpace(altText) ? null : altText.Trim();
+        IsCover = isCover;
     }
 }
