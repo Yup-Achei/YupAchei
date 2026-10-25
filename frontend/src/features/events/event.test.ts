@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { findEvent, listEvents } from '@/features/events/events'
+import { findEvent, listEvents, listEventsByCategory } from '@/features/events/events'
 
 const now = new Date('2026-10-21T15:00:00-04:00')
 
@@ -24,5 +24,11 @@ describe('eventos', () => {
       localId: null,
       localLivre: { nome: 'Mirantes I, II e III' },
     })
+  })
+
+  it('filtra os eventos da categoria pela data', () => {
+    expect(listEventsByCategory('cultura', '2026-10-24', now).map((event) => event.id)).toEqual([
+      'evt-002',
+    ])
   })
 })

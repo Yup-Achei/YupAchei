@@ -17,13 +17,15 @@ describe('rotas', () => {
   it('deve abrir a página inicial', () => {
     renderRoute('/')
 
-    expect(screen.getByRole('heading', { name: 'HomePage' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'O que você procura hoje?' }),
+    ).toBeInTheDocument()
   })
 
   it('deve abrir a categoria pelo slug', () => {
     renderRoute('/categoria/bares')
 
-    expect(screen.getByRole('heading', { name: 'Categoria bares' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Bares' })).toBeInTheDocument()
   })
 
   it('deve abrir o local pelo id', () => {
